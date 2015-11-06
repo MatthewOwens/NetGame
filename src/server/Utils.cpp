@@ -16,4 +16,6 @@ void die(const char* message)
 	#elif __linux__
 	std::cout << "Error: " << message << " (errno = " << errno << ")" << std::endl;
 	#endif
+
+	exit(1);
 }

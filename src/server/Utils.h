@@ -5,7 +5,7 @@
 #define SERVERIP "127.0.0.1"
 
 // The TCP/UDP port number for the server to listen on
-#define SERVERPORT "5555"
+#define SERVERPORT 5555
 
 
 // Enumeration to describe the state of the player, placed here to access from the server

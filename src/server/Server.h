@@ -2,6 +2,8 @@
 #define SERVER_H
 #include <SFML/Network/UdpSocket.hpp>
 #include <SFML/Network/TcpSocket.hpp>
+#include <SFML/Network/TcpListener.hpp>
+#include <SFML/Network/IpAddress.hpp>
 #include <SFML/System/Time.hpp>
 #include <SFML/System/Clock.hpp>
 #include <SFML/System/Vector2.hpp>
@@ -35,10 +37,12 @@ private:
 		}
 	};
 
-	sf::Clock clock;
+	sf::IpAddress serverIP;
 	sf::UdpSocket playerSockets[MAX_PLAYERS];
 	std::list<sf::TcpSocket> spectatorSockets;
-	sf::TcpSocket serverSocket;
+	sf::TcpListener serverSocket;
+
+	sf::Clock clock;
 	PlayerData* players[MAX_PLAYERS];
 
 };
