@@ -16,9 +16,27 @@ int Server::run()
 			die("listen failed!");
 	}
 
+	serverSocket.setBlocking(false);
+
+	// Populating our socket selector
+	socketSelector.add(serverSocket);
+
+	for(int i = 0; i < MAX_PLAYERS; ++i)
+		socketSelector.add(playerSockets[i]);
+
 	while(true)
 	{
-
+		if(selector.wait(sf::miliseconds(100)))
+		{
+			// If we recieved something on the server socket
+			if(selector.isReady(serverSocket))
+			{
+			}
+		}
+		else
+		{
+			// No data recieved
+		}
 	}
 
 	return 0;
@@ -42,4 +60,7 @@ Server::~Server()
 		delete players[i];
 		players[i] = NULL;
 	}
+
+	// Ensuring that the socket is closed
+	serverSocket.close();
 }

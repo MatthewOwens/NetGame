@@ -4,6 +4,7 @@
 #include <SFML/Network/TcpSocket.hpp>
 #include <SFML/Network/TcpListener.hpp>
 #include <SFML/Network/IpAddress.hpp>
+#include <SFML/Network/SocketSelector.hpp>
 #include <SFML/System/Time.hpp>
 #include <SFML/System/Clock.hpp>
 #include <SFML/System/Vector2.hpp>
@@ -41,6 +42,7 @@ private:
 	sf::UdpSocket playerSockets[MAX_PLAYERS];
 	std::list<sf::TcpSocket> spectatorSockets;
 	sf::TcpListener serverSocket;
+	sf::SocketSelector selector;
 
 	sf::Clock clock;
 	PlayerData* players[MAX_PLAYERS];
