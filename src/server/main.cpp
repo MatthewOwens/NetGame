@@ -1,8 +1,10 @@
 #include <iostream>
+#include "Server.h"
 
 int main()
 {
+	Server server;
 	std::cout << "Hello, World!" << std::endl;
-	std::cout << "I'm a client!" << std::endl;
+	server.run();
 	return 0;
 }

@@ -1,11 +1,9 @@
 #include "Server.h"
 #include <iostream>
 
-void run()
+int Server::run()
 {
 	std::cout << "Server starting." << std::endl;
-
-	
 	return 0;
 }
 
@@ -13,7 +11,7 @@ Server::Server()
 {
 	// Ensuring our player data is all voided
 	for(int i = 0; i < MAX_PLAYERS; ++i)
-		players = NULL;
+		players[i] = NULL;
 }
 
 Server::~Server()
