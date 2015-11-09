@@ -7,11 +7,12 @@
 #include <SFML/Network/SocketSelector.hpp>
 #include <SFML/System/Time.hpp>
 #include <SFML/System/Clock.hpp>
-#include <SFML/System/Vector2.hpp>
 #include <list>
-#include "Utils.h"
+#include "PlayerData.h"
 
 #define MAX_PLAYERS 4
+#define SERVERPORT 5555
+#define SERVERIP "127.0.0.1"
 
 class Server
 {
@@ -19,28 +20,13 @@ public:
 	Server();
 	~Server();
 	int run();
+	void die(const char *message);
+
 private:
 	void listen();
 	void checkClients();
 
 private:
-	// Struct to describe the data for each player
-	struct PlayerData
-	{
-		sf::Vector2i position;
-		sf::Vector2f velocity;
-		sf::Int32 state;
-		sf::Time updateTime;	// When the last message from the player was recieved
-
-		PlayerData()
-		{
-			position = sf::Vector2i(0,0);
-			velocity = sf::Vector2f(0.0f, 0.0f);
-			state = (sf::Int32)AnimationState::IDLE;
-			updateTime = sf::Time::Zero;
-		}
-	};
-
 	sf::IpAddress serverIP;
 	sf::UdpSocket playerSockets[MAX_PLAYERS];
 	std::list<sf::TcpSocket*> spectatorSockets;
@@ -50,5 +36,7 @@ private:
 	sf::Clock clock;
 	PlayerData* players[MAX_PLAYERS];
 
+	friend sf::Packet& operator >> (sf::Packet& packet, PlayerData& m);
+	friend sf::Packet& operator << (sf::Packet& packet, const PlayerData& m);
 };
 #endif//SERVER_H

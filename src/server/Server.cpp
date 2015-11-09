@@ -48,6 +48,22 @@ int Server::run()
 		else
 		{
 			// Listener socket isn't ready, check the clients
+
+			//Checking the players
+			for(int i = 0; i < MAX_PLAYERS; ++i)
+			{
+				if(selector.isReady(playerSockets[i]))
+				{
+					/* A player has sent some data
+					sf::Packet packet;
+
+					// If everything has been recieved
+					if(playerSockets[i].recieve(packet) == sf::Socket::Done)
+					{
+						// TODO: Pass data into playerData[i];
+					}*/
+				}
+			}
 		}
 	}
 
@@ -121,4 +137,25 @@ Server::~Server()
 
 	// Ensuring that the socket is closed
 	serverSocket.close();
+}
+
+void Server::die(const char* message)
+{
+	#ifdef _WIN32
+	std::cout << "Error: " << message << " (WSAGetLastError() = " << WSAGetLastError() << ")" << std::endl;
+	#elif __linux__
+	std::cout << "Error: " << message << " (errno = " << errno << ")" << std::endl;
+	#endif
+
+	exit(1);
+}
+
+sf::Packet& operator >> (sf::Packet& packet, PlayerData& m)
+{
+	return packet >> m.position.x >> m.position.y  >> m.velocity.x >> m.velocity.y >> m.state >> m.updateTime;
+}
+
+sf::Packet& operator << (sf::Packet& packet, const PlayerData& m)
+{
+	return packet << m.position.x << m.position.y  << m.velocity.x << m.velocity.y << m.state << m.updateTime;
 }
