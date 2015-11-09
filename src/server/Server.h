@@ -19,6 +19,9 @@ public:
 	Server();
 	~Server();
 	int run();
+private:
+	void listen();
+	void checkClients();
 
 private:
 	// Struct to describe the data for each player
@@ -40,7 +43,7 @@ private:
 
 	sf::IpAddress serverIP;
 	sf::UdpSocket playerSockets[MAX_PLAYERS];
-	std::list<sf::TcpSocket> spectatorSockets;
+	std::list<sf::TcpSocket*> spectatorSockets;
 	sf::TcpListener serverSocket;
 	sf::SocketSelector selector;
 
