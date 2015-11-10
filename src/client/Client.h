@@ -16,6 +16,8 @@ class Client
 	private:
 		// Returns the position in the vector for the tile (x,y) onscreen
 		int getVectorPos(int x, int y);
+		void update();
+		void render();
 
 	private:
 		bool close = false;
@@ -25,6 +27,7 @@ class Client
 		ImageManager imageManager;
 		sf::RenderWindow window;
 		sf::Event event;
-		std::vector<Tile> tiles;
+		//std::vector<Tile> tiles;
+		Tile tiles[20][20];
 };
 #endif//CLIENT_H
