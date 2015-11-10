@@ -149,13 +149,3 @@ void Server::die(const char* message)
 
 	exit(1);
 }
-
-sf::Packet& operator >> (sf::Packet& packet, PlayerData& m)
-{
-	return packet >> m.position.x >> m.position.y  >> m.velocity.x >> m.velocity.y >> m.state >> m.updateTime;
-}
-
-sf::Packet& operator << (sf::Packet& packet, const PlayerData& m)
-{
-	return packet << m.position.x << m.position.y  << m.velocity.x << m.velocity.y << m.state << m.updateTime;
-}

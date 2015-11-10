@@ -35,8 +35,5 @@ private:
 
 	sf::Clock clock;
 	PlayerData* players[MAX_PLAYERS];
-
-	friend sf::Packet& operator >> (sf::Packet& packet, PlayerData& m);
-	friend sf::Packet& operator << (sf::Packet& packet, const PlayerData& m);
 };
 #endif//SERVER_H
