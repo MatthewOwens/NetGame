@@ -7,6 +7,9 @@
 #include "InputManager.h"
 #include "ImageManager.h"
 #include "Tile.h"
+#include "Player.h"
+#include "PlayerData.h"
+
 class Client
 {
 	public:
@@ -28,6 +31,10 @@ class Client
 		sf::RenderWindow window;
 		sf::Event event;
 		//std::vector<Tile> tiles;
-		Tile tiles[20][20];
+		Player* player;	// The player that this client controls
+		PlayerData otherPlayers[3];
+
+		//Tile tiles[20][20];
+		Tile** tiles;
 };
 #endif//CLIENT_H

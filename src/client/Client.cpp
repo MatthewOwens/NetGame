@@ -10,6 +10,9 @@ Client::Client() : windowBounds(640, 640)
 	// Loading the assets that we'll be needing
 	imageManager.loadImage("assets/tileSheet.png", "tileSheet");
 
+	// Setting up the player
+	player = new Player(&inputManager);
+
 	// Grabbing the tileSheet texture ref to avoid calling getImage 400 times
 	//sf::Texture& tileSheet = imageManager.getTexture("tileSheet");
 	const int tileSize = Tile::getSize();
@@ -39,6 +42,12 @@ Client::Client() : windowBounds(640, 640)
 		{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
 	};
 
+	// Defining the tile array
+	tiles = new Tile*[20];
+
+	for (int i = 0; i < 20; ++i)
+		tiles[i] = new Tile[20];
+
 	for(int i = 0; i < 20; i++)
 	{
 		for(int j = 0; j < 20; j++)
@@ -52,6 +61,8 @@ Client::Client() : windowBounds(640, 640)
 Client::~Client()
 {
 	imageManager.unloadImage("tileSheet");
+	delete player;
+	player = NULL;
 }
 
 int Client::run()
@@ -67,6 +78,13 @@ int Client::run()
 
 void Client::update()
 {
+	inputManager.update(window);
+
+	// Checking if we should close the window
+	if (inputManager.pressedOnce("close"))
+		close = true;
+
+	player->update(tiles);
 }
 
 void Client::render()
@@ -79,6 +97,9 @@ void Client::render()
 		for(int j = 0; j < 20; ++j)
 			window.draw(tiles[i][j].getSprite());
 	}
+
+	// Drawing the players
+	player->render(window);
 
 	window.display();
 }
