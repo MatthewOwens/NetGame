@@ -23,5 +23,6 @@ class Player
 		bool falling = false;
 		sf::RectangleShape sprite;
 		sf::RectangleShape atkSprite;
+		sf::Int32 previousState;
 };
 #endif//PLAYER_H

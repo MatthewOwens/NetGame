@@ -6,6 +6,7 @@ Player::Player()
 {
 	inputManager = NULL;
 	playerID = 0;
+	previousState = (sf::Int32)playerData.IDLE;
 }
 
 Player::Player(InputManager* input)
@@ -25,6 +26,10 @@ Player::Player(InputManager* input)
 		sprite.setPosition(playerData.position);
 		sprite.setFillColor(sf::Color::Red);
 	}
+
+	atkSprite = sprite;
+	atkSprite.setFillColor(sf::Color(25, 95, 155));
+	previousState = (sf::Int32)playerData.IDLE;
 }
 
 Player::~Player()
@@ -41,7 +46,6 @@ void Player::update(Tile** tiles)
 	int gridX = (playerData.position.x + 16) / Tile::getSize();
 	int gridY = (playerData.position.y + 16) / Tile::getSize();
 
-
 	// Updating the velocity based on input, if the player isn't attacking
 	if(playerData.state != (sf::Int32)playerData.SWING)
 	{
@@ -49,15 +53,24 @@ void Player::update(Tile** tiles)
 		{
 			playerData.velocity.x = -speed;
 			playerData.state = (sf::Int32)playerData.LEFT;
+
+			if(inputManager->pressedOnce("left") || previousState == (sf::Int32)playerData.IDLE)
+				atkSprite.move(-Tile::getSize(), 0);
 		}
-		else if (inputManager->keyHeld("right"))
+		if (inputManager->keyHeld("right"))
 		{
 			playerData.velocity.x = speed;
 			playerData.state = (sf::Int32)playerData.RIGHT;
+
+			if(inputManager->pressedOnce("right") || previousState == (sf::Int32)playerData.IDLE)
+				atkSprite.move(Tile::getSize(), 0);
 		}
-		else
+
+		if(inputManager->keyHeld("left") && inputManager->keyHeld("right") ||
+			!inputManager->keyHeld("left") && !inputManager->keyHeld("right"))
 		{
 			playerData.velocity.x = 0.0f;
+			atkSprite.setPosition(playerData.position);
 			playerData.state = (sf::Int32)playerData.IDLE;
 		}
 
@@ -88,6 +101,7 @@ void Player::update(Tile** tiles)
 
 			// Moving the player out of the tile
 			sprite.move(0, -(sprite.getGlobalBounds().top + Tile::getSize()- tileBounds.top));
+			atkSprite.move(0, -(sprite.getGlobalBounds().top + Tile::getSize()- tileBounds.top));
 		}
 	}
 
@@ -101,9 +115,6 @@ void Player::update(Tile** tiles)
 		{
 			// Stop the player's ascent
 			playerData.velocity.y = 0.0f;
-
-			// Moving the player out of the tile
-			sprite.move(0, tileBounds.top + tileBounds.height - sprite.getGlobalBounds().top);
 		}
 	}
 
@@ -118,8 +129,6 @@ void Player::update(Tile** tiles)
 				if(sprite.getGlobalBounds().intersects(tileBounds))
 				{
 					playerData.velocity.x = 0.0f;
-
-					sprite.move(tileBounds.left + tileBounds.width - sprite.getGlobalBounds().left, 0);
 				}
 			}
 			break;
@@ -133,8 +142,6 @@ void Player::update(Tile** tiles)
 				if(sprite.getGlobalBounds().intersects(tileBounds))
 				{
 					playerData.velocity.x = 0.0f;
-
-					sprite.move(-(sprite.getGlobalBounds().left + sprite.getGlobalBounds().width - tileBounds.left), 0);
 				}
 			}
 			break;
@@ -142,10 +149,14 @@ void Player::update(Tile** tiles)
 
 	// Moving based on velocity
 	sprite.move(playerData.velocity);
+	atkSprite.move(playerData.velocity);
+
 	playerData.position = sprite.getPosition();
+	previousState = playerData.state;
 }
 
 void Player::render(sf::RenderWindow& window)
 {
 	window.draw(sprite);
+	window.draw(atkSprite);
 }
