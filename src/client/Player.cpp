@@ -37,39 +37,107 @@ void Player::update(Tile** tiles)
 	if (inputManager == NULL)
 		return;
 
-	// Updating the velocity based on input
-	if (inputManager->keyHeld("left"))
-	{
-		playerData.velocity.x = -speed;
-		playerData.state = (sf::Int32)playerData.LEFT;
-	}
-	else if (inputManager->keyHeld("right"))
-	{
-		playerData.velocity.x = speed;
-		playerData.state = (sf::Int32)playerData.RIGHT;
-	}
-	else
-	{
-		playerData.velocity.x = 0.0f;
-		playerData.state = (sf::Int32)playerData.IDLE;
-	}
+	// Grabbing our position on the grid for this frame
+	int gridX = (playerData.position.x + 16) / Tile::getSize();
+	int gridY = (playerData.position.y + 16) / Tile::getSize();
 
-	// Making the player fall if they're in the air and not jumping
-	if (playerData.state != (sf::Int32)playerData.JUMP)
-	{
-		int gridX = playerData.position.x / Tile::getSize();
-		int gridY = playerData.position.y / Tile::getSize();
 
-		// Checking what tile's under us
-		if (tiles[gridX][gridY + 1].getID() == 0)
+	// Updating the velocity based on input, if the player isn't attacking
+	if(playerData.state != (sf::Int32)playerData.SWING)
+	{
+		if (inputManager->keyHeld("left"))
 		{
-			playerData.velocity.y = speed * 2;
+			playerData.velocity.x = -speed;
+			playerData.state = (sf::Int32)playerData.LEFT;
 		}
-		else playerData.velocity.y = 0.0f;
+		else if (inputManager->keyHeld("right"))
+		{
+			playerData.velocity.x = speed;
+			playerData.state = (sf::Int32)playerData.RIGHT;
+		}
+		else
+		{
+			playerData.velocity.x = 0.0f;
+			playerData.state = (sf::Int32)playerData.IDLE;
+		}
+
+		if(inputManager->pressedOnce("up"))
+		{
+			// Preventing infinite jumps
+			if(playerData.velocity.y == 0.0f)
+			{
+				playerData.velocity.y = -10.0f;
+			}
+		}
 	}
+
+	// Making the player fall if they're in the air
+	// Outside the switch as the player could be moving in a direction + falling
+
+	// If the tile under us is air
+	if(tiles[gridX][gridY + 1].getID() == 0)
+		playerData.velocity.y += speed / 10;	// Fall
 	else
 	{
-		// TODO: Apply gravity, check for landings etc
+		// Check if we're intersecting
+		sf::FloatRect tileBounds = tiles[gridX][gridY + 1].getGlobalBounds();
+		if(sprite.getGlobalBounds().intersects(tileBounds))
+		{
+			// Stop the player's fall
+			playerData.velocity.y = 0.0f;
+
+			// Moving the player out of the tile
+			sprite.move(0, -(sprite.getGlobalBounds().top + Tile::getSize()- tileBounds.top));
+		}
+	}
+
+	// If we're jumping and the tile above us is not air
+	if(playerData.velocity.y < 0 && tiles[gridX][gridY - 1].getID() == 1)
+	{
+		sf::FloatRect tileBounds = tiles[gridX][gridY - 1].getGlobalBounds();
+
+		// Check if we're colliding
+		if(sprite.getGlobalBounds().intersects(tileBounds))
+		{
+			// Stop the player's ascent
+			playerData.velocity.y = 0.0f;
+
+			// Moving the player out of the tile
+			sprite.move(0, tileBounds.top + tileBounds.height - sprite.getGlobalBounds().top);
+		}
+	}
+
+	switch(playerData.state)
+	{
+		// Checking for collisions with the left side if we're moving left
+		case ((sf::Int32)playerData.LEFT):
+			if(tiles[gridX - 1][gridY].getID() == 1)
+			{
+				sf::FloatRect tileBounds = tiles[gridX - 1][gridY].getGlobalBounds();
+
+				if(sprite.getGlobalBounds().intersects(tileBounds))
+				{
+					playerData.velocity.x = 0.0f;
+
+					sprite.move(tileBounds.left + tileBounds.width - sprite.getGlobalBounds().left, 0);
+				}
+			}
+			break;
+
+		// Checking for collisions with the right side if we're moving right
+		case ((sf::Int32)playerData.RIGHT):
+			if(tiles[gridX + 1][gridY].getID() == 1)
+			{
+				sf::FloatRect tileBounds = tiles[gridX + 1][gridY].getGlobalBounds();
+
+				if(sprite.getGlobalBounds().intersects(tileBounds))
+				{
+					playerData.velocity.x = 0.0f;
+
+					sprite.move(-(sprite.getGlobalBounds().left + sprite.getGlobalBounds().width - tileBounds.left), 0);
+				}
+			}
+			break;
 	}
 
 	// Moving based on velocity

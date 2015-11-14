@@ -52,8 +52,8 @@ Client::Client() : windowBounds(640, 640)
 	{
 		for(int j = 0; j < 20; j++)
 		{
-			tiles[i][j] = Tile(ids[i][j], imageManager.getTexture("tileSheet"));
-			tiles[i][j].getSprite().setPosition(j * tileSize, i * tileSize);
+			tiles[j][i] = Tile(ids[i][j], imageManager.getTexture("tileSheet"));
+			tiles[j][i].getSprite().setPosition(j * tileSize, i * tileSize);
 		}
 	}
 }

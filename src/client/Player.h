@@ -19,7 +19,8 @@ class Player
 		InputManager* inputManager;
 		sf::Int32 playerID;
 		PlayerData playerData;
-		const float speed = 1.0f;
+		const float speed = 2.0f;
+		bool falling = false;
 		sf::RectangleShape sprite;
 		sf::RectangleShape atkSprite;
 };

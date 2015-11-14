@@ -8,6 +8,7 @@ class Tile
 		Tile(int id, sf::Texture& texture);
 		Tile();
 		inline sf::Sprite& getSprite() { return sprite; }
+		inline sf::FloatRect getGlobalBounds() { return sprite.getGlobalBounds(); }
 		inline int getID() { return identifier; }
 		inline static const int getSize() { return 32; }
 	private:
