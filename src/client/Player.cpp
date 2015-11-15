@@ -7,6 +7,7 @@ Player::Player()
 	inputManager = NULL;
 	playerID = 0;
 	previousState = (sf::Int32)playerData.IDLE;
+	atkTimer.restart();
 }
 
 Player::Player(InputManager* input)
@@ -30,6 +31,7 @@ Player::Player(InputManager* input)
 	atkSprite = sprite;
 	atkSprite.setFillColor(sf::Color(25, 95, 155));
 	previousState = (sf::Int32)playerData.IDLE;
+	atkTimer.restart();
 }
 
 Player::~Player()
@@ -47,40 +49,51 @@ void Player::update(Tile** tiles)
 	int gridY = (playerData.position.y + 16) / Tile::getSize();
 
 	// Updating the velocity based on input, if the player isn't attacking
-	if(playerData.state != (sf::Int32)playerData.SWING)
+	if (inputManager->keyHeld("left"))
 	{
-		if (inputManager->keyHeld("left"))
-		{
-			playerData.velocity.x = -speed;
-			playerData.state = (sf::Int32)playerData.LEFT;
+		playerData.velocity.x = -speed;
+		playerData.state = (sf::Int32)playerData.LEFT;
 
-			if(inputManager->pressedOnce("left") || previousState == (sf::Int32)playerData.IDLE)
-				atkSprite.move(-Tile::getSize(), 0);
-		}
-		if (inputManager->keyHeld("right"))
+		if(inputManager->pressedOnce("left") || previousState == (sf::Int32)playerData.IDLE)
 		{
-			playerData.velocity.x = speed;
-			playerData.state = (sf::Int32)playerData.RIGHT;
-
-			if(inputManager->pressedOnce("right") || previousState == (sf::Int32)playerData.IDLE)
-				atkSprite.move(Tile::getSize(), 0);
-		}
-
-		if(inputManager->keyHeld("left") && inputManager->keyHeld("right") ||
-			!inputManager->keyHeld("left") && !inputManager->keyHeld("right"))
-		{
-			playerData.velocity.x = 0.0f;
 			atkSprite.setPosition(playerData.position);
-			playerData.state = (sf::Int32)playerData.IDLE;
+			atkSprite.move(-Tile::getSize(), 0);
 		}
+	}
+	if (inputManager->keyHeld("right"))
+	{
+		playerData.velocity.x = speed;
+		playerData.state = (sf::Int32)playerData.RIGHT;
 
-		if(inputManager->pressedOnce("up"))
+		if(inputManager->pressedOnce("right") || previousState == (sf::Int32)playerData.IDLE)
 		{
-			// Preventing infinite jumps
-			if(playerData.velocity.y == 0.0f)
-			{
-				playerData.velocity.y = -10.0f;
-			}
+			atkSprite.setPosition(playerData.position);
+			atkSprite.move(Tile::getSize(), 0);
+		}
+	}
+
+	if(inputManager->keyHeld("left") && inputManager->keyHeld("right") ||
+		!inputManager->keyHeld("left") && !inputManager->keyHeld("right"))
+	{
+		playerData.velocity.x = 0.0f;
+		playerData.state = (sf::Int32)playerData.IDLE;
+	}
+
+	if(inputManager->pressedOnce("up"))
+	{
+		// Preventing infinite jumps
+		if(playerData.velocity.y == 0.0f)
+		{
+			playerData.velocity.y = -7.5f;
+		}
+	}
+
+	if(inputManager->pressedOnce("melee"))
+	{
+		if(playerData.state != (sf::Int32)playerData.SWING)
+		{
+			playerData.state = (sf::Int32)playerData.SWING;
+			atkTimer.restart();
 		}
 	}
 
@@ -145,6 +158,24 @@ void Player::update(Tile** tiles)
 				}
 			}
 			break;
+
+		case ((sf::Int32)playerData.SWING):
+			if(atkTimer.getElapsedTime().asSeconds() <= 0.5f)
+			{
+				atkSprite.setFillColor(sf::Color(0, 125, 125, 100));
+				break;
+			}
+
+			if(atkTimer.getElapsedTime().asSeconds() >= 0.6f)
+			{
+				atkSprite.setFillColor(sf::Color(255, 0, 0, 100));
+			}
+
+			if(atkTimer.getElapsedTime().asSeconds() >= 0.7f)
+			{
+				atkSprite.setFillColor(sf::Color(0, 0, 0, 0));
+				playerData.state = (sf::Int32)playerData.IDLE;
+			}
 	}
 
 	// Moving based on velocity

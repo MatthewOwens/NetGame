@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/System/Vector2.hpp>
+#include <SFML/System/Clock.hpp>
 #include <vector>
 #include "InputManager.h"
 #include "ImageManager.h"
@@ -30,11 +31,10 @@ class Client
 		ImageManager imageManager;
 		sf::RenderWindow window;
 		sf::Event event;
-		//std::vector<Tile> tiles;
+
 		Player* player;	// The player that this client controls
 		PlayerData otherPlayers[3];
 
-		//Tile tiles[20][20];
 		Tile** tiles;
 };
 #endif//CLIENT_H

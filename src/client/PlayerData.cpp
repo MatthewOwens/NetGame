@@ -5,15 +5,16 @@ PlayerData::PlayerData()
 	position = sf::Vector2f(0.0f, 0.0f);
 	velocity = sf::Vector2f(0.0f, 0.0f);
 	state = (sf::Int32)AnimationState::IDLE;
-	updateTime = sf::Time::Zero.asMilliseconds();
+	updateTime = 0.0f;
+	atkTimer = 0.0f;
 }
 
 sf::Packet& operator >> (sf::Packet& packet, PlayerData& m)
 {
-	return packet >> m.position.x >> m.position.y  >> m.velocity.x >> m.velocity.y >> m.state >> m.updateTime;
+	return packet >> m.position.x >> m.position.y  >> m.velocity.x >> m.velocity.y >> m.state >> m.updateTime >> m.atkTimer;
 }
 
 sf::Packet& operator << (sf::Packet& packet, const PlayerData& m)
 {
-	return packet << m.position.x << m.position.y  << m.velocity.x << m.velocity.y << m.state << m.updateTime;
+	return packet << m.position.x << m.position.y  << m.velocity.x << m.velocity.y << m.state << m.updateTime << m.atkTimer;
 }

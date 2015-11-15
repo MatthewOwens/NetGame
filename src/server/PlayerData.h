@@ -8,7 +8,8 @@ class PlayerData
 	friend class Player;
 public:
 	// Enumeration to describe the state of the player, placed here to access from the server
-	enum AnimationState {IDLE, LEFT, RIGHT, JUMP, SWING};
+	enum AnimationState {IDLE, LEFT, RIGHT, SWING};
+	float atkTimer;
 
 	PlayerData();
 

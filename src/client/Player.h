@@ -2,6 +2,7 @@
 #define PLAYER_H
 #include <SFML/Network/Packet.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/System/Clock.hpp>
 #include "InputManager.h"
 #include "PlayerData.h"
 #include "Tile.h"
@@ -21,8 +22,10 @@ class Player
 		PlayerData playerData;
 		const float speed = 2.0f;
 		bool falling = false;
+		bool attacking = false;
 		sf::RectangleShape sprite;
 		sf::RectangleShape atkSprite;
 		sf::Int32 previousState;
+		sf::Clock atkTimer;
 };
 #endif//PLAYER_H
