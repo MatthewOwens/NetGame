@@ -7,6 +7,7 @@ PlayerData::PlayerData()
 	state = (sf::Int32)AnimationState::IDLE;
 	updateTime = 0.0f;
 	atkTimer = 0.0f;
+	clientID = 0;
 }
 
 sf::Packet& operator >> (sf::Packet& packet, PlayerData& m)

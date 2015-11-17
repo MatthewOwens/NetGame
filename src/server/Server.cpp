@@ -1,11 +1,12 @@
 #include "Server.h"
 #include <iostream>
 #include <SFML/Window/Keyboard.hpp>
+#include <cstdio>
 
 int Server::run()
 {
 	std::cout << "Server starting..." << std::endl;
-	std::cout << "The server can currently only be killed by the OS" << std::endl;
+	std::cout << "The server can currently only be killed by the OS, sorry!" << std::endl;
 	//std::cout << "Press 'q' to quit" << std::endl;
 
 	// Creating the socket that the server will listen on
@@ -15,7 +16,7 @@ int Server::run()
 	{
 		// Something's gone wrong with creating the socket, but what?
 		if(listenStatus == sf::Socket::Error)
-			die("listen failed!");
+			die("listen failed!"); //TODO: Fix rather than just death
 	}
 
 	serverSocket.setBlocking(false);
@@ -72,14 +73,15 @@ int Server::run()
 
 void Server::listen()
 {
-	bool playersAccept = false;
+	// Using SFML's int types to avoid issues with varying int sizes on
+	// different machines.
+	sf::Int8 clientID = 0;
 
 	// Checking if we can connect any more players
-	for(int i = 0; i < MAX_PLAYERS; ++i)
+	for(; clientID < MAX_PLAYERS; ++clientID)
 	{
-		if(players[i] == NULL)
+		if(players[clientID] == NULL)
 		{
-			playersAccept = true;
 			break;
 		}
 	}
@@ -88,17 +90,48 @@ void Server::listen()
 	sf::TcpSocket* client = new sf::TcpSocket;
 	if(serverSocket.accept(*client) == sf::Socket::Done)
 	{
-		if(playersAccept)
+		std::cout << "New connection recieved from " << client->getRemoteAddress() << std::endl;
+		client->setBlocking(false);
+
+		// If we have player slots available
+		if (clientID != MAX_PLAYERS)
 		{
-			// Player connection available
+			std::cout << "Player slots are available, welcome player " << clientID + 1 << std::endl;
 			// TODO: confirm connection type with client and swtich to UDP
+			std::size_t sizeSent = 0;
+			client->send((void*)clientID, sizeof(clientID), sizeSent);
+
+			// If the data wasn't fully sent
+			//if (sizeSent != sizeof(isPlayer))
+			while (sizeSent != sizeof(clientID))
+			{
+				sizeSent = 0;
+				client->send((void*)clientID, sizeof(clientID), sizeSent);
+			}
+
+			// Populate playerData
+			players[clientID] = new PlayerData();
+			players[clientID]->clientID = clientID;
 		}
 		else
 		{
-			client->setBlocking(false);
+			// No player slots available, add the client as a spectator
+			std::cout << "No player slots available, welcome spectator!";
+			std::size_t sizeSent = 0;
+			clientID = -1;
+
+			client->send((void*)clientID, sizeof(clientID), sizeSent);
+
+			while (sizeSent != sizeof(clientID))
+			{
+				sizeSent = 0;
+				client->send((void*)clientID, sizeof(clientID), sizeSent);
+			}
+
 			spectatorSockets.push_back(client);
-			selector.add(*client);
 		}
+
+			selector.add(*client);
 	}
 	else
 	{

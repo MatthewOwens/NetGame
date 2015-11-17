@@ -17,6 +17,7 @@ public:
 	sf::Vector2f velocity;
 	sf::Int32 state;
 	sf::Int32 updateTime;	// When the last message from the player was recieved in milliseconds
+	sf::Int8 clientID;
 
 	friend sf::Packet& operator >> (sf::Packet& packet, PlayerData& m);
 	friend sf::Packet& operator << (sf::Packet& packet, const PlayerData& m);

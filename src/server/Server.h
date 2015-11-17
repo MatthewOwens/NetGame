@@ -10,6 +10,11 @@
 #include <list>
 #include "PlayerData.h"
 
+#ifdef _WIN32
+#include <WinSock2.h>
+#pragma comment(lib, "ws2_32.lib")
+#endif
+
 #define MAX_PLAYERS 4
 #define SERVERPORT 5555
 #define SERVERIP "127.0.0.1"
