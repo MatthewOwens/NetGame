@@ -29,7 +29,7 @@ Player::Player(InputManager* input)
 	}
 
 	atkSprite = sprite;
-	atkSprite.setFillColor(sf::Color(25, 95, 155));
+	atkSprite.setFillColor(sf::Color(0,0,0,0));
 	previousState = (sf::Int32)playerData.IDLE;
 	atkTimer.restart();
 }
@@ -92,7 +92,8 @@ void Player::update(Tile** tiles)
 	{
 		if(playerData.state != (sf::Int32)playerData.SWING)
 		{
-			playerData.state = (sf::Int32)playerData.SWING;
+			//playerData.state = (sf::Int32)playerData.SWING;
+			attacking = true;
 			atkTimer.restart();
 		}
 	}
@@ -131,51 +132,53 @@ void Player::update(Tile** tiles)
 		}
 	}
 
-	switch(playerData.state)
+	switch (playerData.state)
 	{
 		// Checking for collisions with the left side if we're moving left
-		case ((sf::Int32)playerData.LEFT):
-			if(tiles[gridX - 1][gridY].getID() == 1)
-			{
-				sf::FloatRect tileBounds = tiles[gridX - 1][gridY].getGlobalBounds();
+	case ((sf::Int32)playerData.LEFT) :
+		if (tiles[gridX - 1][gridY].getID() == 1)
+		{
+			sf::FloatRect tileBounds = tiles[gridX - 1][gridY].getGlobalBounds();
 
-				if(sprite.getGlobalBounds().intersects(tileBounds))
-				{
-					playerData.velocity.x = 0.0f;
-				}
+			if (sprite.getGlobalBounds().intersects(tileBounds))
+			{
+				playerData.velocity.x = 0.0f;
 			}
-			break;
+		}
+		break;
 
 		// Checking for collisions with the right side if we're moving right
-		case ((sf::Int32)playerData.RIGHT):
-			if(tiles[gridX + 1][gridY].getID() == 1)
-			{
-				sf::FloatRect tileBounds = tiles[gridX + 1][gridY].getGlobalBounds();
+	case ((sf::Int32)playerData.RIGHT) :
+		if (tiles[gridX + 1][gridY].getID() == 1)
+		{
+			sf::FloatRect tileBounds = tiles[gridX + 1][gridY].getGlobalBounds();
 
-				if(sprite.getGlobalBounds().intersects(tileBounds))
-				{
-					playerData.velocity.x = 0.0f;
-				}
-			}
-			break;
-
-		case ((sf::Int32)playerData.SWING):
-			if(atkTimer.getElapsedTime().asSeconds() <= 0.5f)
+			if (sprite.getGlobalBounds().intersects(tileBounds))
 			{
-				atkSprite.setFillColor(sf::Color(0, 125, 125, 100));
-				break;
+				playerData.velocity.x = 0.0f;
 			}
+		}
+		break;
+	}
 
-			if(atkTimer.getElapsedTime().asSeconds() >= 0.6f)
-			{
-				atkSprite.setFillColor(sf::Color(255, 0, 0, 100));
-			}
+	if (attacking)
+	{
+		if(atkTimer.getElapsedTime().asSeconds() <= 0.5f)
+		{
+			atkSprite.setFillColor(sf::Color(0, 125, 125, 100));
+		}
 
-			if(atkTimer.getElapsedTime().asSeconds() >= 0.7f)
-			{
-				atkSprite.setFillColor(sf::Color(0, 0, 0, 0));
-				playerData.state = (sf::Int32)playerData.IDLE;
-			}
+		if(atkTimer.getElapsedTime().asSeconds() >= 0.6f)
+		{
+			atkSprite.setFillColor(sf::Color(255, 0, 0, 100));
+		}
+
+		if(atkTimer.getElapsedTime().asSeconds() >= 0.7f)
+		{
+			atkSprite.setFillColor(sf::Color(0, 0, 0, 0));
+			attacking = false;
+			atkTimer.restart();
+		}
 	}
 
 	// Moving based on velocity
