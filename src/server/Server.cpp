@@ -31,11 +31,6 @@ int Server::run()
 	{
 		// Checking if we've quit
 		// TODO: Non-blocking or threaded keybaord input
-		if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q))
-		{
-			std::cout << "Quitting!" << std::endl;
-			return 0;
-		}
 
 		//if(selector.wait(sf::miliseconds(100)))
 		if(selector.wait())
@@ -102,8 +97,8 @@ void Server::listen()
 			client->send((void*)clientID, sizeof(clientID), sizeSent);
 
 			// If the data wasn't fully sent
-			//if (sizeSent != sizeof(isPlayer))
-			while (sizeSent != sizeof(clientID))
+			if (sizeSent != sizeof(clientID))
+			//while (sizeSent != sizeof(clientID))
 			{
 				sizeSent = 0;
 				client->send((void*)clientID, sizeof(clientID), sizeSent);
