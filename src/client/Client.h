@@ -32,6 +32,9 @@ class Client
 		sf::RenderWindow window;
 		sf::Event event;
 
+		sf::TcpSocket* tcpSocket;
+		sf::UdpSocket* udpSocket;
+
 		Player* player;	// The player that this client controls
 		PlayerData otherPlayers[3];
 

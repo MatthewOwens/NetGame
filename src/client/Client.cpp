@@ -6,6 +6,9 @@ Client::Client() : windowBounds(640, 640)
 {
 	window.create(sf::VideoMode(windowBounds.x ,windowBounds.y), "NetGame - Client");
 	window.setFramerateLimit(60);
+
+	tcpSocket = NULL;
+	udpSocket = NULL;
 	
 	// Loading the assets that we'll be needing
 	imageManager.loadImage("assets/tileSheet.png", "tileSheet");
