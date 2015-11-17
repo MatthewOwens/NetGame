@@ -4,6 +4,8 @@
 #include <SFML/Window/Event.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/System/Clock.hpp>
+#include <SFML/Network/TcpSocket.hpp>
+#include <SFML/Network/UdpSocket.hpp>
 #include <vector>
 #include "InputManager.h"
 #include "ImageManager.h"

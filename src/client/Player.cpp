@@ -5,7 +5,7 @@
 Player::Player()
 {
 	inputManager = NULL;
-	playerID = 0;
+	playerData.clientID = 0;
 	previousState = (sf::Int32)playerData.IDLE;
 	atkTimer.restart();
 }
@@ -13,12 +13,12 @@ Player::Player()
 Player::Player(InputManager* input)
 {
 	inputManager = input;
-	playerID = 0;
+	playerData.clientID = 0;
 
 	// Initilising our sprite
 	sprite.setSize(sf::Vector2f(32.0f, 32.0f));
 
-	switch (playerID)
+	switch (playerData.clientID)
 	{
 		// TODO: Place each player in different positions initially
 		// TODO: Give each player different colors initially

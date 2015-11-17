@@ -15,10 +15,10 @@ class Player
 		~Player();
 		void update(Tile** tiles);
 		void render(sf::RenderWindow& window);
+		sf::Int8& getID() {return playerData.clientID; }
 
 	private:
 		InputManager* inputManager;
-		sf::Int32 playerID;
 		PlayerData playerData;
 		const float speed = 2.0f;
 		bool falling = false;

@@ -1,5 +1,6 @@
 #include "Client.h"
-#include "SFML/Graphics/Texture.hpp"
+#include <SFML/Graphics/Texture.hpp>
+#include <SFML/Network/IpAddress.hpp>
 #include <iostream>
 
 Client::Client() : windowBounds(640, 640)
@@ -64,12 +65,36 @@ Client::Client() : windowBounds(640, 640)
 Client::~Client()
 {
 	imageManager.unloadImage("tileSheet");
+
 	delete player;
 	player = NULL;
+
+	delete tcpSocket;
+	tcpSocket = NULL;
+
+	delete udpSocket;
+	udpSocket = NULL;
 }
 
 int Client::run()
 {
+	// Connecting to the server
+	std::cout << "Connecting... " << std::endl;
+	tcpSocket = new sf::TcpSocket();
+	tcpSocket->setBlocking(false);
+	tcpSocket->connect(sf::IpAddress(SERVERIP), SERVERPORT);
+
+	// Getting our ID from the server
+	std::size_t received = 0;
+	sf::Socket::Status status;
+
+	status = tcpSocket->receive(&player->getID(), sizeof(player->getID()), received);
+
+	while(status != sf::Socket::Done)
+		status = tcpSocket->receive(&player->getID(), sizeof(player->getID()), received);
+
+	std::cout << "Connected successfully, client ID of " << (int)player->getID() << " was assigned!" << std::endl;
+
 	while(!close)
 	{
 		update();

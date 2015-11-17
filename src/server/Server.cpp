@@ -94,14 +94,13 @@ void Server::listen()
 			std::cout << "Player slots are available, welcome player " << clientID + 1 << std::endl;
 			// TODO: confirm connection type with client and swtich to UDP
 			std::size_t sizeSent = 0;
-			client->send((void*)clientID, sizeof(clientID), sizeSent);
+			client->send(&clientID, sizeof(clientID), sizeSent);
 
 			// If the data wasn't fully sent
 			if (sizeSent != sizeof(clientID))
-			//while (sizeSent != sizeof(clientID))
 			{
 				sizeSent = 0;
-				client->send((void*)clientID, sizeof(clientID), sizeSent);
+				client->send(&clientID, sizeof(clientID), sizeSent);
 			}
 
 			// Populate playerData
@@ -111,16 +110,16 @@ void Server::listen()
 		else
 		{
 			// No player slots available, add the client as a spectator
-			std::cout << "No player slots available, welcome spectator!";
+			std::cout << "No player slots available, welcome spectator!" << std::endl;
 			std::size_t sizeSent = 0;
 			clientID = -1;
 
-			client->send((void*)clientID, sizeof(clientID), sizeSent);
+			client->send(&clientID, sizeof(clientID), sizeSent);
 
 			while (sizeSent != sizeof(clientID))
 			{
 				sizeSent = 0;
-				client->send((void*)clientID, sizeof(clientID), sizeSent);
+				client->send(&clientID, sizeof(clientID), sizeSent);
 			}
 
 			spectatorSockets.push_back(client);
