@@ -97,18 +97,54 @@ int Client::run()
 
 	if ((int)player->getID() != -1)
 	{
+		sf::IpAddress confirmedIP;
+		unsigned short confirmedPort;
 		std::cout << "Sending UDP packet" << std::endl;
+
 		// Init the UdpSocket if we're not a spectator
 		udpSocket = new sf::UdpSocket();
-		//udpSocket->bind(udpSocket->AnyPort);
-		udpSocket->bind(55576);
+		udpSocket->bind(udpSocket->AnyPort);
 
 		// Clearing the TCP socket since we won't be using it
 		delete tcpSocket;
 		tcpSocket = 0;
 
-		std::string message = "Client connected via udp\n";
-		udpSocket->send(message.c_str(), message.size() + 1, SERVERIP, SERVERPORT);
+		sf::Uint16 conf = 0;
+		status = udpSocket->send(&conf, sizeof(conf), SERVERIP, SERVERPORT);
+
+		while (status == sf::Socket::NotReady)
+		{
+			status = udpSocket->send(&conf, sizeof(conf), SERVERIP, SERVERPORT);
+		}
+
+		if (status == sf::Socket::Error)
+		{
+			// TODO: Handle Errors
+		}
+
+		while (status == sf::Socket::NotReady || conf == 0)
+		{
+			status = udpSocket->receive(&conf, sizeof(conf), received,
+					 confirmedIP, confirmedPort);
+		}
+		if (status == sf::Socket::Error)
+		{
+			// TODO: Handle Errors
+		}
+
+		status = sf::Socket::NotReady;
+		conf = 0;
+
+		while (status == sf::Socket::NotReady)
+		{
+			status = udpSocket->send(&conf, sizeof(conf), SERVERIP, SERVERPORT);
+		}
+		if (status == sf::Socket::Error)
+		{
+			// TODO: Handle Errors
+		}
+		//std::string message = "Client connected via udp\n";
+		//udpSocket->send(message.c_str(), message.size() + 1, SERVERIP, SERVERPORT);
 	}
 
 

@@ -3,10 +3,13 @@
 #include <SFML/Window/Keyboard.hpp>
 #include <cstdio>
 
+#define UNCONFIRMED  99
+
 int Server::run()
 {
 	std::cout << "Server starting..." << std::endl;
 	std::cout << "The server can currently only be killed by the OS, sorry!" << std::endl;
+	std::cout << std::endl;
 	//std::cout << "Press 'q' to quit" << std::endl;
 
 	// Creating the socket that the server will listen on
@@ -45,13 +48,15 @@ int Server::run()
 				if(selector.isReady(playerSocket))
 				{
 					// If everything has been recieved
-					char buffer[1024];
+					//char buffer[1024];
 					std::size_t recieved = 0;
 					sf::IpAddress sender;
-					unsigned short port;
+					unsigned short port = 0;
 
-					sf::Socket::Status status;
-					status = playerSocket.receive(buffer, sizeof(buffer), recieved, sender, port);
+					sf::Socket::Status status = sf::Socket::NotReady;
+					sf::Packet packet;
+					//status = playerSocket.receive(buffer, sizeof(buffer), recieved, sender, port);
+					status = playerSocket.receive(packet, sender, port);
 
 					if (status == sf::Socket::Done)
 					{
@@ -62,6 +67,10 @@ int Server::run()
 
 							for (int i = 0; i < MAX_PLAYERS; ++i)
 							{
+								// Freeing up the player and machine data of the
+								// client that disconnected.
+
+								// TODO: Handle random disconnects
 								if (machines[i] != NULL)
 								{
 									if (sender == machines[i]->ip &&
@@ -77,19 +86,15 @@ int Server::run()
 							}
 						}
 
-						std::cout << "Received a message from " << port << "\n\t";
-						for (int i = 0; i < recieved; ++i)
-							std::cout << buffer[i];
-
 						// Populating the upd port if it isn't already
-						for (int i = 0; i < MAX_PLAYERS; ++i)
+						/*for (int i = 0; i < MAX_PLAYERS; ++i)
 						{
 							if (machines[i] != NULL)
 							{
 								if (machines[i]->ip == sender && machines[i]->port == 0)
 									machines[i]->port = port;
 							}
-						}
+						}*/
 					}
 				}
 			}
@@ -126,6 +131,8 @@ void Server::listen()
 		{
 			std::cout << "Player slots are available, welcome player " << clientID + 1 << std::endl;
 			std::size_t sizeSent = 0;
+			std::size_t sizeReceived = 0;
+			sf::Uint16 conf = UNCONFIRMED;
 			client->send(&clientID, sizeof(clientID), sizeSent);
 
 			// If the data wasn't fully sent
@@ -143,7 +150,41 @@ void Server::listen()
 			machines[clientID] = new Machine();
 			machines[clientID]->ip = client->getRemoteAddress();
 			machines[clientID]->port = 0;
-			//machines[clientID]->port = client->getRemotePort();
+
+			// TODO: Implement timeouts for handshakes rather than while loops
+			sf::Socket::Status status = sf::Socket::NotReady;
+			std::cout << "Confirming client's UDP port... ";
+
+			// Ensuring that the packet was recieved
+			while (status == sf::Socket::NotReady || conf == UNCONFIRMED)
+			{
+				status = playerSocket.receive(&conf, sizeof(conf), sizeReceived,
+						 machines[clientID]->ip, machines[clientID]->port);
+			}
+
+			conf = UNCONFIRMED;
+			status = sf::Socket::NotReady;
+			std::cout << "OK!" << std::endl;
+			std::cout << "Sending confirmation to the client... ";
+
+			// Sending a confirmation to the client
+			while (status == sf::Socket::NotReady)
+			{
+				status = playerSocket.send(&conf, sizeof(conf),
+						 machines[clientID]->ip, machines[clientID]->port);
+			}
+
+			std::cout << "OK!" << std::endl;
+			std::cout << "Waiting for client acknowledgement... ";
+
+			while (status == sf::Socket::NotReady || conf == UNCONFIRMED)
+			{
+				status = playerSocket.receive(&conf, sizeof(conf), sizeReceived,
+						 machines[clientID]->ip, machines[clientID]->port);
+			}
+
+			std::cout << "OK!" << std::endl;
+
 		}
 		else
 		{
