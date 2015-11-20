@@ -50,8 +50,16 @@ int Server::run()
 					sf::IpAddress sender;
 					unsigned short port;
 
-					if (playerSocket.receive(buffer, sizeof(buffer), recieved, sender, port) == sf::Socket::Done)
+					sf::Socket::Status status;
+					status = playerSocket.receive(buffer, sizeof(buffer), recieved, sender, port);
+
+					if (status == sf::Socket::Done)
 					{
+						if (recieved == 0)
+						{
+							std::cout << "Client disconnected" << std::endl;
+						}
+
 						std::cout << "Received a message from " << port << "\n\t";
 						for (int i = 0; i < recieved; ++i)
 							std::cout << buffer[i];

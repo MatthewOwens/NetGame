@@ -118,6 +118,13 @@ int Client::run()
 		render();
 	}
 
+	sf::Int8 message = 0;
+	std::cout << "message size is " << sizeof(message) << std::endl;
+	status = udpSocket->send(&message, std::size_t(message), SERVERIP, SERVERPORT);
+
+	while (status == sf::Socket::NotReady)
+		status = udpSocket->send(&message, std::size_t(message), SERVERIP, SERVERPORT);
+
 	return 0;
 }
 
