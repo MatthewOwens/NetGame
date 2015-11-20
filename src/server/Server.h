@@ -33,7 +33,7 @@ private:
 
 private:
 	sf::IpAddress serverIP;
-	sf::UdpSocket playerSockets[MAX_PLAYERS];
+	sf::UdpSocket playerSocket;
 	std::list<sf::TcpSocket*> spectatorSockets;
 	sf::TcpListener serverSocket;
 	sf::SocketSelector selector;

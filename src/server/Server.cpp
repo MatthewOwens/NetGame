@@ -24,8 +24,7 @@ int Server::run()
 	// Populating our socket selector
 	selector.add(serverSocket);
 
-	for(int i = 0; i < MAX_PLAYERS; ++i)
-		selector.add(playerSockets[i]);
+	selector.add(playerSocket);
 
 	while(true)
 	{
@@ -46,18 +45,19 @@ int Server::run()
 			// Listener socket isn't ready, check the clients
 
 			//Checking the players
-			for(int i = 0; i < MAX_PLAYERS; ++i)
+			if(selector.isReady(playerSocket))
 			{
-				if(selector.isReady(playerSockets[i]))
-				{
-					/* A player has sent some data
-					sf::Packet packet;
+				// If everything has been recieved
+				char buffer[1024];
+				std::size_t recieved = 0;
+				sf::IpAddress sender;
+				unsigned short port;
 
-					// If everything has been recieved
-					if(playerSockets[i].recieve(packet) == sf::Socket::Done)
-					{
-						// TODO: Pass data into playerData[i];
-					}*/
+				if (playerSocket.receive(buffer, sizeof(buffer), recieved, sender, port) == sf::Socket::Done)
+				{
+					std::cout << "Received the message:\n\t";
+					for (int i = 0; i < recieved; ++i)
+						std::cout << buffer[i];
 				}
 			}
 		}
