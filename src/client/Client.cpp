@@ -143,21 +143,23 @@ int Client::run()
 		{
 			// TODO: Handle Errors
 		}
-		//std::string message = "Client connected via udp\n";
-		//udpSocket->send(message.c_str(), message.size() + 1, SERVERIP, SERVERPORT);
 	}
 
+	updateClock.restart();
 
+	// Our actual game loop
 	while(!close)
 	{
 		update();
 		render();
 	}
 
+	// Sending our disconnect packet
 	sf::Int8 message = 0;
 	std::cout << "message size is " << sizeof(message) << std::endl;
 	status = udpSocket->send(&message, std::size_t(message), SERVERIP, SERVERPORT);
 
+	// Ensuring that it's actually sent
 	while (status == sf::Socket::NotReady)
 		status = udpSocket->send(&message, std::size_t(message), SERVERIP, SERVERPORT);
 
@@ -173,6 +175,23 @@ void Client::update()
 		close = true;
 
 	player->update(tiles);
+
+	// Checking if we should send an update packet
+	if (updateClock.getElapsedTime().asMilliseconds() >= 30)
+	{
+		sf::Socket::Status status;
+		sf::Packet packet;
+
+		packet << player->getData();
+		status = udpSocket->send(packet, SERVERIP, SERVERPORT);
+
+		if (status == sf::Socket::Done)
+			updateClock.restart();
+		else if (status == sf::Socket::Error)
+		{
+			std::cout << "Error occured while sending update packet!" << std::endl;
+		}
+	}
 }
 
 void Client::render()

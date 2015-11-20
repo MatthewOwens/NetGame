@@ -11,10 +11,11 @@ PlayerData::PlayerData()
 
 sf::Packet& operator >> (sf::Packet& packet, PlayerData& m)
 {
-	return packet >> m.position.x >> m.position.y  >> m.velocity.x >> m.velocity.y >> m.state >> m.updateTime >> m.atkTimer;
+	return packet >> m.clientID >> m.position.x >> m.position.y  >> m.velocity.x >> m.velocity.y >> m.state >> m.updateTime >> m.atkTimer;
 }
 
 sf::Packet& operator << (sf::Packet& packet, const PlayerData& m)
 {
-	return packet << m.position.x << m.position.y  << m.velocity.x << m.velocity.y << m.state << m.updateTime << m.atkTimer;
+	// Not reading out the client id, since we extract that first server side
+	return packet << m.clientID << m.position.x << m.position.y  << m.velocity.x << m.velocity.y << m.state << m.updateTime << m.atkTimer;
 }

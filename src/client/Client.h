@@ -31,6 +31,7 @@ class Client
 
 		InputManager inputManager;
 		ImageManager imageManager;
+		sf::Clock updateClock;
 		sf::RenderWindow window;
 		sf::Event event;
 

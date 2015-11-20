@@ -16,8 +16,6 @@
 #endif
 
 #define MAX_PLAYERS 4
-#define SERVERPORT 5555
-#define SERVERIP "127.0.0.1"
 
 class Server
 {

@@ -69,6 +69,7 @@ void Server::checkClients()
 		// If everything has been recieved
 		if (status == sf::Socket::Done)
 		{
+			recieved = packet.getDataSize();
 			// If the client disconnected
 			if (recieved == 0)
 			{
@@ -93,6 +94,24 @@ void Server::checkClients()
 						}
 					}
 				}
+			}
+			else
+			{
+				// Client connected alright
+				PlayerData incomingData;
+
+				if (packet >> incomingData)
+				{
+					int id = incomingData.clientID;
+
+					// Updaing our data for a client if this packet was newer
+					if (incomingData.updateTime > players[id]->updateTime)
+						*players[id] = incomingData;
+
+					std::cout << "Client " << id + 1 << " update receieved!" << std::endl;
+				}
+				else
+					std::cout << "Data extract unsuccessful! " << std::endl;
 			}
 		}
 	}

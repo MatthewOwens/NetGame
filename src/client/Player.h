@@ -16,6 +16,7 @@ class Player
 		void update(Tile** tiles);
 		void render(sf::RenderWindow& window);
 		sf::Int8& getID() {return playerData.clientID; }
+		PlayerData& getData() { return playerData; }
 
 	private:
 		InputManager* inputManager;

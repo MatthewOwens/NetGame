@@ -4,8 +4,9 @@
 #include <SFML/System/Time.hpp>
 #include <SFML/Network/Packet.hpp>
 
-#define SERVERPORT 5555
 #define SERVERIP "127.0.0.1"
+#define SERVERPORT 5555
+
 class PlayerData
 {
 	friend class Player;
