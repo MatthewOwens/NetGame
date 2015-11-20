@@ -104,14 +104,51 @@ void Server::checkClients()
 				{
 					int id = incomingData.clientID;
 
-					// Updaing our data for a client if this packet was newer
+					// Updating our data for a client if this packet was newer
 					if (incomingData.updateTime > players[id]->updateTime)
+					{
 						*players[id] = incomingData;
 
-					//std::cout << "Client " << id + 1 << " update receieved!" << std::endl;
+						// Pushing out the update to our remaining clients
+						for (int i = 0; i < MAX_PLAYERS; ++i)
+						{
+							// Only sending the update to valid clients
+							if (i != id && players[i] != NULL)
+							{
+								status = playerSocket.send(packet, machines[i]->ip, machines[i]->port);
+
+								while (status == sf::Socket::NotReady)
+									status = playerSocket.send(packet, machines[i]->ip, machines[i]->port);
+
+								if (status == sf::Socket::Error)
+								{
+									// TODO: Error handling
+								}
+								else if (status == sf::Socket::Done)
+									std::cout << "Sent packet to client " << id + 1 << " successfully!" << std::endl;
+							}
+						}
+					}
 				}
 				else
-					std::cout << "Data extract unsuccessful! " << std::endl;
+				{
+					// Error extracting packet, check if it was from a client
+					int errClient = 0;
+					for (; errClient < MAX_PLAYERS; ++errClient)
+					{
+						if (machines[errClient] != NULL)
+						{
+							if (sender == machines[errClient]->ip && port == machines[errClient]->port)
+								break;
+						}
+					}
+					if (errClient == MAX_PLAYERS)
+					{
+						std::cout << "Received an odd packet from someone else!" << std::endl;
+					}
+					else
+						std::cout << "Error extracting packet from player " << errClient + 1 << std::endl;
+				}
 			}
 		}
 	}

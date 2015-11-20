@@ -99,10 +99,11 @@ int Client::run()
 	{
 		sf::IpAddress confirmedIP;
 		unsigned short confirmedPort;
-		std::cout << "Sending UDP packet" << std::endl;
+		std::cout << "UDP handshake... ";
 
 		// Init the UdpSocket if we're not a spectator
 		udpSocket = new sf::UdpSocket();
+		udpSocket->setBlocking(false);
 		udpSocket->bind(udpSocket->AnyPort);
 
 		// Clearing the TCP socket since we won't be using it
@@ -143,6 +144,8 @@ int Client::run()
 		{
 			// TODO: Handle Errors
 		}
+
+		std::cout << "OK!";
 	}
 
 	updateClock.restart();
@@ -167,6 +170,12 @@ int Client::run()
 
 void Client::update()
 {
+	sf::Socket::Status status;
+	sf::Packet packet;
+
+	sf::IpAddress remoteIP;
+	unsigned short remotePort;
+
 	inputManager.update(window);
 
 	// Checking if we should close the window
@@ -178,8 +187,6 @@ void Client::update()
 	// Checking if we should send an update packet
 	if (updateClock.getElapsedTime().asMilliseconds() >= 30)
 	{
-		sf::Socket::Status status;
-		sf::Packet packet;
 
 		packet << player->getData();
 		status = udpSocket->send(packet, SERVERIP, SERVERPORT);
@@ -190,6 +197,34 @@ void Client::update()
 		{
 			std::cout << "Error occured while sending update packet!" << std::endl;
 		}
+	}
+
+	// Checking to see if we've got any updates from the server
+	status = udpSocket->receive(packet, remoteIP, remotePort);
+
+	if (status == sf::Socket::Done)
+	{
+		// Only bother with the packet if it was actually from the server
+		if (remoteIP == SERVERIP && remotePort == SERVERPORT)
+		{
+			PlayerData incomingData;
+
+			if (packet >> incomingData)
+			{
+				int id = incomingData.clientID;
+
+				// Updating our data for the other player if it's newer
+				if (incomingData.updateTime > otherPlayers[id].updateTime)
+				{
+					std::cout << "Updated data for player " << id + 1 << std::endl;
+					otherPlayers[id] = incomingData;
+				}
+			}
+		}
+	}
+	else if (status == sf::Socket::NotReady)
+	{
+		std::cout << "bah" << std::endl;
 	}
 }
 
