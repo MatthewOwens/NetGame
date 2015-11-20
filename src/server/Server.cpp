@@ -39,25 +39,23 @@ int Server::run()
 			{
 				listen();
 			}
-		}
-		else
-		{
-			// Listener socket isn't ready, check the clients
-
-			//Checking the players
-			if(selector.isReady(playerSocket))
+			else
 			{
-				// If everything has been recieved
-				char buffer[1024];
-				std::size_t recieved = 0;
-				sf::IpAddress sender;
-				unsigned short port;
-
-				if (playerSocket.receive(buffer, sizeof(buffer), recieved, sender, port) == sf::Socket::Done)
+				//Checking the players
+				if(selector.isReady(playerSocket))
 				{
-					std::cout << "Received the message:\n\t";
-					for (int i = 0; i < recieved; ++i)
-						std::cout << buffer[i];
+					// If everything has been recieved
+					char buffer[1024];
+					std::size_t recieved = 0;
+					sf::IpAddress sender;
+					unsigned short port;
+
+					if (playerSocket.receive(buffer, sizeof(buffer), recieved, sender, port) == sf::Socket::Done)
+					{
+						std::cout << "Received a message from " << port << "\n\t";
+						for (int i = 0; i < recieved; ++i)
+							std::cout << buffer[i];
+					}
 				}
 			}
 		}
@@ -138,6 +136,9 @@ Server::Server()
 {
 	// Setting up the SFML ip
 	serverIP = sf::IpAddress(SERVERIP);
+
+	// Initilising our udp socket
+	playerSocket.bind(SERVERPORT);
 
 	// Ensuring our player data is all voided
 	for(int i = 0; i < MAX_PLAYERS; ++i)

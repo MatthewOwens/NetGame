@@ -95,23 +95,25 @@ int Client::run()
 
 	std::cout << "Connected successfully, client ID of " << (int)player->getID() << " was assigned!" << std::endl;
 
+	if ((int)player->getID() != -1)
+	{
+		std::cout << "Sending UDP packet" << std::endl;
+		// Init the UdpSocket if we're not a spectator
+		udpSocket = new sf::UdpSocket();
+		udpSocket->bind(udpSocket->AnyPort);
+		//udpSocket->bind(55576);
+
+		// Clearing the TCP socket since we won't be using it
+		delete tcpSocket;
+		tcpSocket = 0;
+
+		std::string message = "Client connected via udp\n";
+		udpSocket->send(message.c_str(), message.size() + 1, SERVERIP, SERVERPORT);
+	}
+
 
 	while(!close)
 	{
-		if ((int)player->getID() != -1)
-		{
-			std::cout << "Sending UDP packet" << std::endl;
-			// Init the UdpSocket if we're not a spectator
-			udpSocket = new sf::UdpSocket();
-			udpSocket->bind(SERVERPORT);
-
-			// Clearing the TCP socket since we won't be using it
-			delete tcpSocket;
-			tcpSocket = 0;
-
-			std::string message = "Client connected via udp";
-			udpSocket->send(message.c_str(), message.size() + 1, SERVERIP, SERVERPORT);
-		}
 		update();
 		render();
 	}
