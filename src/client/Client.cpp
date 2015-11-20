@@ -100,8 +100,8 @@ int Client::run()
 		std::cout << "Sending UDP packet" << std::endl;
 		// Init the UdpSocket if we're not a spectator
 		udpSocket = new sf::UdpSocket();
-		udpSocket->bind(udpSocket->AnyPort);
-		//udpSocket->bind(55576);
+		//udpSocket->bind(udpSocket->AnyPort);
+		udpSocket->bind(55576);
 
 		// Clearing the TCP socket since we won't be using it
 		delete tcpSocket;

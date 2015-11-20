@@ -29,7 +29,7 @@ int Server::run()
 	while(true)
 	{
 		// Checking if we've quit
-		// TODO: Non-blocking or threaded keybaord input
+		// TODO: Non-blocking or threaded keyboard input
 
 		//if(selector.wait(sf::miliseconds(100)))
 		if(selector.wait())
@@ -55,14 +55,41 @@ int Server::run()
 
 					if (status == sf::Socket::Done)
 					{
+						// If the client disconnected
 						if (recieved == 0)
 						{
 							std::cout << "Client disconnected" << std::endl;
+
+							for (int i = 0; i < MAX_PLAYERS; ++i)
+							{
+								if (machines[i] != NULL)
+								{
+									if (sender == machines[i]->ip &&
+										port == machines[i]->port)
+									{
+										delete machines[i];
+										delete players[i];
+
+										machines[i] = 0;
+										players[i] = 0;
+									}
+								}
+							}
 						}
 
 						std::cout << "Received a message from " << port << "\n\t";
 						for (int i = 0; i < recieved; ++i)
 							std::cout << buffer[i];
+
+						// Populating the upd port if it isn't already
+						for (int i = 0; i < MAX_PLAYERS; ++i)
+						{
+							if (machines[i] != NULL)
+							{
+								if (machines[i]->ip == sender && machines[i]->port == 0)
+									machines[i]->port = port;
+							}
+						}
 					}
 				}
 			}
@@ -98,7 +125,6 @@ void Server::listen()
 		if (clientID != MAX_PLAYERS)
 		{
 			std::cout << "Player slots are available, welcome player " << clientID + 1 << std::endl;
-			// TODO: confirm connection type with client and swtich to UDP
 			std::size_t sizeSent = 0;
 			client->send(&clientID, sizeof(clientID), sizeSent);
 
@@ -112,6 +138,12 @@ void Server::listen()
 			// Populate playerData
 			players[clientID] = new PlayerData();
 			players[clientID]->clientID = clientID;
+
+			// Pupulating our machines list
+			machines[clientID] = new Machine();
+			machines[clientID]->ip = client->getRemoteAddress();
+			machines[clientID]->port = 0;
+			//machines[clientID]->port = client->getRemotePort();
 		}
 		else
 		{

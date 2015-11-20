@@ -22,6 +22,12 @@
 class Server
 {
 public:
+	struct Machine
+	{
+		sf::IpAddress ip;
+		unsigned short port;
+	};
+
 	Server();
 	~Server();
 	int run();
@@ -39,6 +45,7 @@ private:
 	sf::SocketSelector selector;
 
 	sf::Clock clock;
+	Machine* machines[MAX_PLAYERS];
 	PlayerData* players[MAX_PLAYERS];
 };
 #endif//SERVER_H
