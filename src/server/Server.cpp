@@ -108,7 +108,7 @@ void Server::checkClients()
 					if (incomingData.updateTime > players[id]->updateTime)
 						*players[id] = incomingData;
 
-					std::cout << "Client " << id + 1 << " update receieved!" << std::endl;
+					//std::cout << "Client " << id + 1 << " update receieved!" << std::endl;
 				}
 				else
 					std::cout << "Data extract unsuccessful! " << std::endl;

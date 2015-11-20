@@ -155,13 +155,12 @@ int Client::run()
 	}
 
 	// Sending our disconnect packet
-	sf::Int8 message = 0;
-	std::cout << "message size is " << sizeof(message) << std::endl;
-	status = udpSocket->send(&message, std::size_t(message), SERVERIP, SERVERPORT);
+	sf::Packet message;
+	status = udpSocket->send(message, SERVERIP, SERVERPORT);
 
 	// Ensuring that it's actually sent
 	while (status == sf::Socket::NotReady)
-		status = udpSocket->send(&message, std::size_t(message), SERVERIP, SERVERPORT);
+		status = udpSocket->send(message, SERVERIP, SERVERPORT);
 
 	return 0;
 }
