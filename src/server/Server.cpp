@@ -15,10 +15,10 @@ int Server::run()
 	// Creating the socket that the server will listen on
 	sf::Socket::Status listenStatus = serverSocket.listen(SERVERPORT);
 
-	if(listenStatus != sf::Socket::Done)
+	if (listenStatus != sf::Socket::Done)
 	{
 		// Something's gone wrong with creating the socket, but what?
-		if(listenStatus == sf::Socket::Error)
+		if (listenStatus == sf::Socket::Error)
 			die("listen failed!"); //TODO: Fix rather than just death
 	}
 
@@ -29,79 +29,73 @@ int Server::run()
 
 	selector.add(playerSocket);
 
-	while(true)
+	while (true)
 	{
 		// Checking if we've quit
 		// TODO: Non-blocking or threaded keyboard input
 
 		//if(selector.wait(sf::miliseconds(100)))
-		if(selector.wait())
+		if (selector.wait())
 		{
 			// If we recieved something on the server socket
-			if(selector.isReady(serverSocket))
+			if (selector.isReady(serverSocket))
 			{
 				listen();
 			}
 			else
 			{
-				//Checking the players
-				if(selector.isReady(playerSocket))
-				{
-					// If everything has been recieved
-					//char buffer[1024];
-					std::size_t recieved = 0;
-					sf::IpAddress sender;
-					unsigned short port = 0;
-
-					sf::Socket::Status status = sf::Socket::NotReady;
-					sf::Packet packet;
-					//status = playerSocket.receive(buffer, sizeof(buffer), recieved, sender, port);
-					status = playerSocket.receive(packet, sender, port);
-
-					if (status == sf::Socket::Done)
-					{
-						// If the client disconnected
-						if (recieved == 0)
-						{
-							std::cout << "Client disconnected" << std::endl;
-
-							for (int i = 0; i < MAX_PLAYERS; ++i)
-							{
-								// Freeing up the player and machine data of the
-								// client that disconnected.
-
-								// TODO: Handle random disconnects
-								if (machines[i] != NULL)
-								{
-									if (sender == machines[i]->ip &&
-										port == machines[i]->port)
-									{
-										delete machines[i];
-										delete players[i];
-
-										machines[i] = 0;
-										players[i] = 0;
-									}
-								}
-							}
-						}
-
-						// Populating the upd port if it isn't already
-						/*for (int i = 0; i < MAX_PLAYERS; ++i)
-						{
-							if (machines[i] != NULL)
-							{
-								if (machines[i]->ip == sender && machines[i]->port == 0)
-									machines[i]->port = port;
-							}
-						}*/
-					}
-				}
+				checkClients();
 			}
 		}
 	}
 
 	return 0;
+}
+
+void Server::checkClients()
+{
+	//Checking the players
+	if(selector.isReady(playerSocket))
+	{
+		std::size_t recieved = 0;
+		sf::IpAddress sender;
+		unsigned short port = 0;
+
+		sf::Socket::Status status = sf::Socket::NotReady;
+		sf::Packet packet;
+		//status = playerSocket.receive(buffer, sizeof(buffer), recieved, sender, port);
+		status = playerSocket.receive(packet, sender, port);
+
+		// If everything has been recieved
+		if (status == sf::Socket::Done)
+		{
+			// If the client disconnected
+			if (recieved == 0)
+			{
+				std::cout << "Client disconnected" << std::endl;
+
+				for (int i = 0; i < MAX_PLAYERS; ++i)
+				{
+					// Freeing up the player and machine data of the
+					// client that disconnected.
+
+					// TODO: Handle random disconnects
+					if (machines[i] != NULL)
+					{
+						if (sender == machines[i]->ip &&
+							port == machines[i]->port)
+						{
+							delete machines[i];
+							delete players[i];
+
+							machines[i] = 0;
+							players[i] = 0;
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 void Server::listen()
