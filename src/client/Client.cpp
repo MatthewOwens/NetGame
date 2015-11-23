@@ -148,6 +148,7 @@ int Client::run()
 		std::cout << "OK!";
 	}
 
+	player->setColour();
 
 	// Our actual game loop
 	while(!close)

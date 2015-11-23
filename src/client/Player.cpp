@@ -19,31 +19,8 @@ Player::Player(InputManager* input)
 	sprite.setSize(sf::Vector2f(32.0f, 32.0f));
 
 	// Assigning each player a different color
-	switch (playerData.clientID)
-	{
-	default:
-		// Shouldn't be called, since we can't have more than 4 clients
-		sprite.setFillColor(sf::Color(255, 255, 255));
-		playerData.position = sf::Vector2f(32.0f, 32.0f);
-		break;
-	case 0:
-		sprite.setFillColor(sf::Color(255, 0, 0));
-		playerData.position = sf::Vector2f(32.0f, 32.0f);
-		break;
-	case 1:
-		sprite.setFillColor(sf::Color(0, 255, 0));
-		playerData.position = sf::Vector2f(32.0f, 32.0f);
-		break;
-	case 2:
-		sprite.setFillColor(sf::Color(0, 0, 255));
-		playerData.position = sf::Vector2f(32.0f, 32.0f);
-		break;
-	case 3:
-		sprite.setFillColor(sf::Color(173, 173, 0));
-		playerData.position = sf::Vector2f(32.0f, 32.0f);
-		break;
-	}
 
+	playerData.position = sf::Vector2f(32.0f, 32.0f);
 	sprite.setPosition(playerData.position);
 
 	atkSprite = sprite;
@@ -211,4 +188,32 @@ void Player::render(sf::RenderWindow& window)
 {
 	window.draw(sprite);
 	window.draw(atkSprite);
+}
+
+void Player::setColour()
+{
+	switch (playerData.clientID)
+	{
+	default:
+		// Shouldn't be called, since we can't have more than 4 clients
+		sprite.setFillColor(sf::Color(255, 255, 255));
+		playerData.position = sf::Vector2f(32.0f, 32.0f);
+		break;
+	case 0:
+		sprite.setFillColor(sf::Color(255, 0, 0));
+		playerData.position = sf::Vector2f(32.0f, 32.0f);
+		break;
+	case 1:
+		sprite.setFillColor(sf::Color(0, 255, 0));
+		playerData.position = sf::Vector2f(32.0f, 32.0f);
+		break;
+	case 2:
+		sprite.setFillColor(sf::Color(0, 0, 255));
+		playerData.position = sf::Vector2f(32.0f, 32.0f);
+		break;
+	case 3:
+		sprite.setFillColor(sf::Color(173, 173, 0));
+		playerData.position = sf::Vector2f(32.0f, 32.0f);
+		break;
+	}
 }
