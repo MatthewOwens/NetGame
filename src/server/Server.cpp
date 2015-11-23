@@ -98,6 +98,7 @@ void Server::checkClients()
 			else
 			{
 				// Client connected alright
+				std::cout << "PACKET GETTU!" << std::endl;
 				PlayerData incomingData;
 
 				if (packet >> incomingData)
@@ -113,21 +114,31 @@ void Server::checkClients()
 						for (int i = 0; i < MAX_PLAYERS; ++i)
 						{
 							// Only sending the update to valid clients
-							if (i != id && players[i] != NULL)
+							if (/*i != id && */players[i] != NULL)
 							{
 								status = playerSocket.send(packet, machines[i]->ip, machines[i]->port);
 
-								while (status == sf::Socket::NotReady)
+								if (status == sf::Socket::NotReady)
+								{
+									std::cout << "NOT_READY" << std::endl;
 									status = playerSocket.send(packet, machines[i]->ip, machines[i]->port);
+								}
 
 								if (status == sf::Socket::Error)
 								{
 									// TODO: Error handling
+									std::cout << "Error sending sf::packet" << std::endl;
 								}
 								else if (status == sf::Socket::Done)
 									std::cout << "Sent packet to client " << id + 1 << " successfully!" << std::endl;
 							}
 						}
+					}
+					else
+					{
+						std::cout << "Old packet!" << std::endl;
+						std::cout << "\t Current: " << players[id]->updateTime << std::endl;
+						std::cout << "\t New: " << incomingData.updateTime << std::endl;
 					}
 				}
 				else

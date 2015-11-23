@@ -148,7 +148,6 @@ int Client::run()
 		std::cout << "OK!";
 	}
 
-	updateClock.restart();
 
 	// Our actual game loop
 	while(!close)
@@ -164,6 +163,8 @@ int Client::run()
 	// Ensuring that it's actually sent
 	while (status == sf::Socket::NotReady)
 		status = udpSocket->send(message, SERVERIP, SERVERPORT);
+
+	updateClock.restart();
 
 	return 0;
 }
@@ -185,14 +186,17 @@ void Client::update()
 	player->update(tiles);
 
 	// Checking if we should send an update packet
-	if (updateClock.getElapsedTime().asMilliseconds() >= 30)
+	if (updateClock.getElapsedTime().asMilliseconds() >= 1000)
 	{
-
+		player->getData().updateTime += updateClock.getElapsedTime().asMilliseconds();
 		packet << player->getData();
 		status = udpSocket->send(packet, SERVERIP, SERVERPORT);
 
 		if (status == sf::Socket::Done)
+		{
+			std::cout << "Send success!" << std::endl;
 			updateClock.restart();
+		}
 		else if (status == sf::Socket::Error)
 		{
 			std::cout << "Error occured while sending update packet!" << std::endl;
@@ -224,7 +228,7 @@ void Client::update()
 	}
 	else if (status == sf::Socket::NotReady)
 	{
-		std::cout << "bah" << std::endl;
+		//std::cout << "bah" << std::endl;
 	}
 }
 
