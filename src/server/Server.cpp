@@ -47,6 +47,8 @@ int Server::run()
 				checkClients();
 			}
 		}
+
+		frameClock.restart();
 	}
 
 	return 0;
@@ -54,6 +56,24 @@ int Server::run()
 
 void Server::checkClients()
 {
+	// Updating our timers & checking for disconnects
+	for(int i = 0; i < MAX_PLAYERS; ++i)
+	{
+		if(machines[i] != NULL)
+		{
+			if(machines[i]->timeSinceUpdate >= DISCONNECT_TIME_MS)
+			{
+				std::cout << "Client " << i + 1 << " has timed out!" << std::endl;
+
+				delete players[i];
+				delete machines[i];
+
+				players[i] = NULL;
+				machines[i] = NULL;
+			}
+		}
+	}
+
 	//Checking the players
 	if(selector.isReady(playerSocket))
 	{

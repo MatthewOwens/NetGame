@@ -16,6 +16,8 @@
 #endif
 
 #define MAX_PLAYERS 4
+#define DISCONNECT_TIME_MS 5000
+#define INTERP_TIME_MS 2500
 
 class Server
 {
@@ -24,6 +26,7 @@ public:
 	{
 		sf::IpAddress ip;
 		unsigned short port;
+		float timeSinceUpdate;
 	};
 
 	Server();
@@ -43,6 +46,7 @@ private:
 	sf::SocketSelector selector;
 
 	sf::Clock clock;
+	sf::Clock frameClock;
 	Machine* machines[MAX_PLAYERS];
 	PlayerData* players[MAX_PLAYERS];
 };
