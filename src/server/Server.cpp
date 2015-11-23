@@ -98,7 +98,6 @@ void Server::checkClients()
 			else
 			{
 				// Client connected alright
-				std::cout << "PACKET GETTU!" << std::endl;
 				PlayerData incomingData;
 
 				if (packet >> incomingData)
@@ -129,8 +128,6 @@ void Server::checkClients()
 									// TODO: Error handling
 									std::cout << "Error sending sf::packet" << std::endl;
 								}
-								else if (status == sf::Socket::Done)
-									std::cout << "Sent packet to client " << id + 1 << " successfully!" << std::endl;
 							}
 						}
 					}

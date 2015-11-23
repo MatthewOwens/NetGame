@@ -198,7 +198,7 @@ void Client::update()
 	player->update(tiles);
 
 	// Checking if we should send an update packet
-	if (updateClock.getElapsedTime().asMilliseconds() >= 1000)
+	if (updateClock.getElapsedTime().asMilliseconds() >= 20)
 	{
 		player->getData().updateTime += updateClock.getElapsedTime().asMilliseconds();
 		packet << player->getData();
@@ -206,7 +206,6 @@ void Client::update()
 
 		if (status == sf::Socket::Done)
 		{
-			std::cout << "Send success!" << std::endl;
 			updateClock.restart();
 		}
 		else if (status == sf::Socket::Error)
@@ -236,17 +235,10 @@ void Client::update()
 				// Updating our data for the other player if it's newer
 				if (incomingData.updateTime > otherPlayers[id]->getUpdateTime())
 				{
-					std::cout << "Updated data for player " << id + 1 << std::endl;
-					//otherPlayers[id]->setData(incomingData);
 					otherPlayers[id]->update(incomingData);
-					//otherPlayers[id] = incomingData;
 				}
 			}
 		}
-	}
-	else if (status == sf::Socket::NotReady)
-	{
-		//std::cout << "bah" << std::endl;
 	}
 }
 
