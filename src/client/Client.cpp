@@ -177,7 +177,18 @@ void Client::update()
 	sf::IpAddress remoteIP;
 	unsigned short remotePort;
 
-	inputManager.update(window);
+	sf::Event event;
+	while (window.pollEvent(event))
+	{
+		if (event.type == sf::Event::Closed)
+			close = true;
+		else if (event.type == sf::Event::GainedFocus)
+			windowFocus = true;
+		else if (event.type == sf::Event::LostFocus)
+			windowFocus = false;
+	}
+
+	inputManager.update(window, windowFocus);
 
 	// Checking if we should close the window
 	if (inputManager.pressedOnce("close"))

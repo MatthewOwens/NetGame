@@ -27,6 +27,7 @@ class Client
 
 	private:
 		bool close = false;
+		bool windowFocus = true;
 		const sf::Vector2i windowBounds;
 
 		InputManager inputManager;

@@ -9,7 +9,7 @@ class InputManager
     public:
         InputManager();
         virtual ~InputManager();
-        void update(sf::RenderWindow& window);
+        void update(sf::RenderWindow& window, bool windowFocused);
         bool pressedOnce(std::string keyName);
 		bool pressedOnce(sf::Mouse::Button button);
 		bool keyHeld(std::string keyName);

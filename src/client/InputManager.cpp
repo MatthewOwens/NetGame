@@ -19,8 +19,17 @@ InputManager::~InputManager()
     //dtor
 }
 
-void InputManager::update(sf::RenderWindow& window)
+void InputManager::update(sf::RenderWindow& window, bool windowFocused)
 {
+	if (!windowFocused)
+	{
+		for (int i = 0; i < sf::Keyboard::KeyCount; ++i)
+			pressedKeys[i] = false;
+
+		// Window isn't focused, don't check the keys
+		return;
+	}
+
 	// Updating the keyboard state
    	for(int i = 0; i < sf::Keyboard::KeyCount; i++)
    	{
