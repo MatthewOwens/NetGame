@@ -281,7 +281,10 @@ Server::Server()
 
 	// Ensuring our player data is all voided
 	for(int i = 0; i < MAX_PLAYERS; ++i)
+	{
+		machines[i] = NULL;
 		players[i] = NULL;
+	}
 }
 
 Server::~Server()

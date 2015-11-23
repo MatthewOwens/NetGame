@@ -17,6 +17,10 @@ Client::Client() : windowBounds(640, 640)
 	// Setting up the player
 	player = new Player(&inputManager);
 
+	// Ensuring that the other players are null
+	for(int i = 0; i < 3; ++i)
+		otherPlayers[i] = NULL;
+
 	// Grabbing the tileSheet texture ref to avoid calling getImage 400 times
 	//sf::Texture& tileSheet = imageManager.getTexture("tileSheet");
 	const int tileSize = Tile::getSize();
