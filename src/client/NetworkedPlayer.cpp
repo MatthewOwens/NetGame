@@ -69,17 +69,17 @@ void NetworkedPlayer::update(PlayerData newData)
 			atkSprite.move(sf::Vector2f(-32.0f, 0.0f));
 	}
 
-	if (data.atkTimer <= 0.5f)
+	if (data.atkTimer <= 0.5f && data.atkTimer != 0)
 	{
 		atkSprite.setFillColor(sf::Color(0, 125, 125, 100));
 	}
 
-	if (data.atkTimer <= 0.6f)
+	if (data.atkTimer >= 0.6f)
 	{
 		atkSprite.setFillColor(sf::Color(255, 0, 0, 100));
 	}
 
-	if (data.atkTimer >= 0.7f)
+	if (data.atkTimer >= 0.7f || data.atkTimer == 0)
 	{
 		atkSprite.setFillColor(sf::Color(0, 0, 0, 0));
 	}

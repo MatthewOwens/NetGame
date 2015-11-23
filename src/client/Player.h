@@ -18,6 +18,8 @@ class Player
 		void setColour();
 		sf::Int8& getID() {return playerData.clientID; }
 		PlayerData& getData() { return playerData; }
+		float getAtkTime() { return atkTimer.getElapsedTime().asSeconds(); }
+		bool getAttacking() { return attacking; }
 
 	private:
 		InputManager* inputManager;

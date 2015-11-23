@@ -201,6 +201,11 @@ void Client::update()
 	if (updateClock.getElapsedTime().asMilliseconds() >= 20)
 	{
 		player->getData().updateTime += updateClock.getElapsedTime().asMilliseconds();
+		if (player->getAttacking())
+			player->getData().atkTimer = player->getAtkTime();
+		else
+			player->getData().atkTimer = 0.0f;
+
 		packet << player->getData();
 		status = udpSocket->send(packet, SERVERIP, SERVERPORT);
 
