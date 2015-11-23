@@ -12,6 +12,7 @@
 #include "Tile.h"
 #include "Player.h"
 #include "PlayerData.h"
+#include "NetworkedPlayer.h"
 
 class Client
 {
@@ -23,6 +24,7 @@ class Client
 		// Returns the position in the vector for the tile (x,y) onscreen
 		int getVectorPos(int x, int y);
 		void update();
+		void simulatePlayers();
 		void render();
 
 	private:
@@ -40,7 +42,7 @@ class Client
 		sf::UdpSocket* udpSocket;
 
 		Player* player;	// The player that this client controls
-		PlayerData otherPlayers[3];
+		NetworkedPlayer* otherPlayers[3];
 
 		Tile** tiles;
 };

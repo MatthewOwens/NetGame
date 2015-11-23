@@ -114,7 +114,7 @@ void Server::checkClients()
 						for (int i = 0; i < MAX_PLAYERS; ++i)
 						{
 							// Only sending the update to valid clients
-							if (/*i != id && */players[i] != NULL)
+							if (i != id && players[i] != NULL)
 							{
 								status = playerSocket.send(packet, machines[i]->ip, machines[i]->port);
 

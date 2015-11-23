@@ -228,11 +228,17 @@ void Client::update()
 			{
 				int id = incomingData.clientID;
 
+				// Creating a new NetworkedPlayer if we've got a new client
+				if (otherPlayers[id] == NULL)
+					otherPlayers[id] = new NetworkedPlayer(incomingData);
+
 				// Updating our data for the other player if it's newer
-				if (incomingData.updateTime > otherPlayers[id].updateTime)
+				if (incomingData.updateTime > otherPlayers[id]->getUpdateTime())
 				{
 					std::cout << "Updated data for player " << id + 1 << std::endl;
-					otherPlayers[id] = incomingData;
+					//otherPlayers[id]->setData(incomingData);
+					otherPlayers[id]->update(incomingData);
+					//otherPlayers[id] = incomingData;
 				}
 			}
 		}
@@ -255,6 +261,11 @@ void Client::render()
 	}
 
 	// Drawing the players
+	for (int i = 0; i < 3; ++i)
+	{
+		if (otherPlayers[i] != NULL)
+			otherPlayers[i]->render(window);
+	}
 	player->render(window);
 
 	window.display();

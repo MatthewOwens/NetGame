@@ -18,15 +18,33 @@ Player::Player(InputManager* input)
 	// Initilising our sprite
 	sprite.setSize(sf::Vector2f(32.0f, 32.0f));
 
+	// Assigning each player a different color
 	switch (playerData.clientID)
 	{
-		// TODO: Place each player in different positions initially
-		// TODO: Give each player different colors initially
 	default:
+		// Shouldn't be called, since we can't have more than 4 clients
+		sprite.setFillColor(sf::Color(255, 255, 255));
 		playerData.position = sf::Vector2f(32.0f, 32.0f);
-		sprite.setPosition(playerData.position);
-		sprite.setFillColor(sf::Color::Red);
+		break;
+	case 0:
+		sprite.setFillColor(sf::Color(255, 0, 0));
+		playerData.position = sf::Vector2f(32.0f, 32.0f);
+		break;
+	case 1:
+		sprite.setFillColor(sf::Color(0, 255, 0));
+		playerData.position = sf::Vector2f(32.0f, 32.0f);
+		break;
+	case 2:
+		sprite.setFillColor(sf::Color(0, 0, 255));
+		playerData.position = sf::Vector2f(32.0f, 32.0f);
+		break;
+	case 3:
+		sprite.setFillColor(sf::Color(173, 173, 0));
+		playerData.position = sf::Vector2f(32.0f, 32.0f);
+		break;
 	}
+
+	sprite.setPosition(playerData.position);
 
 	atkSprite = sprite;
 	atkSprite.setFillColor(sf::Color(0,0,0,0));
