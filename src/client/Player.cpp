@@ -33,7 +33,7 @@ Player::~Player()
 {
 }
 
-void Player::update(Tile** tiles)
+void Player::update(Tile** tiles, std::vector<sf::RectangleShape>& collisions)
 {
 	// Don't update if pointers are null
 	if (inputManager == NULL)
@@ -179,6 +179,23 @@ void Player::update(Tile** tiles)
 	// Moving based on velocity
 	sprite.move(playerData.velocity);
 	atkSprite.move(playerData.velocity);
+
+	// Checking for collisions
+	for(auto i : collisions)
+	{
+		if(i.getGlobalBounds().intersects(sprite.getGlobalBounds()))
+		{
+			// Resetting positions
+			sprite.setPosition(sf::Vector2f(32.0f, 32.0f));
+			atkSprite.setPosition(sprite.getPosition());
+			atkSprite.move(sf::Vector2f(32.0f, 0));
+
+			// Resetting attack timer
+			atkSprite.setFillColor(sf::Color(0, 0, 0, 0));
+			attacking = false;
+			atkTimer.restart();
+		}
+	}
 
 	playerData.position = sprite.getPosition();
 	previousState = playerData.state;

@@ -13,7 +13,7 @@ public:
 
 	inline const PlayerData& getData() { return data; };
 	inline void setData(PlayerData newData) { data = newData; }
-	inline const sf::RectangleShape getAtkSprite() { return atkSprite; }
+	inline sf::RectangleShape getAtkSprite() { return atkSprite; }
 	inline float getUpdateTime() { return data.updateTime; }
 private:
 	PlayerData data;

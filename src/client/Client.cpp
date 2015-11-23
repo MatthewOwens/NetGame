@@ -178,6 +178,7 @@ void Client::update()
 {
 	sf::Socket::Status status;
 	sf::Packet packet;
+	std::vector<sf::RectangleShape> collisions;
 
 	sf::IpAddress remoteIP;
 	unsigned short remotePort;
@@ -199,7 +200,23 @@ void Client::update()
 	if (inputManager.pressedOnce("close"))
 		close = true;
 
-	player->update(tiles);
+	// Populating our collisions array
+	for(int i = 0; i < 3; ++i)
+	{
+		if(otherPlayers[i] != NULL)
+		{
+			/* Slight difference in the attack timings here, since our timer will never
+			 * _actually_ reach 0.7f, as when it does it's reset on the other client,
+			 * pushed to the server and to here.
+			 */
+			if(otherPlayers[i]->getData().atkTimer >= 0.6f)
+			{
+				collisions.push_back(otherPlayers[i]->getAtkSprite());
+			}
+		}
+	}
+
+	player->update(tiles, collisions);
 
 	// Checking if we should send an update packet
 	if (updateClock.getElapsedTime().asMilliseconds() >= 20)
