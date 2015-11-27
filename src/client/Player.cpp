@@ -110,7 +110,7 @@ void Player::update(Tile** tiles, std::vector<sf::RectangleShape>& collisions)
 
 			// Moving the player out of the tile
 			sprite.move(0, -(sprite.getGlobalBounds().top + Tile::getSize()- tileBounds.top));
-			atkSprite.move(0, -(sprite.getGlobalBounds().top + Tile::getSize()- tileBounds.top));
+			atkSprite.setPosition(atkSprite.getGlobalBounds().left, sprite.getGlobalBounds().top);
 		}
 	}
 

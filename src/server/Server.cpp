@@ -3,7 +3,7 @@
 #include <SFML/Window/Keyboard.hpp>
 #include <cstdio>
 
-#define UNCONFIRMED  99
+#define UNCONFIRMED  -1
 
 int Server::run()
 {
@@ -210,7 +210,10 @@ void Server::listen()
 			std::cout << "Player slots are available, welcome player " << clientID + 1 << std::endl;
 			std::size_t sizeSent = 0;
 			std::size_t sizeReceived = 0;
-			sf::Uint16 conf = UNCONFIRMED;
+			sf::Int32 conf = UNCONFIRMED;
+			sf::Clock timeout;
+			sf::Clock pingClock;
+
 			client->send(&clientID, sizeof(clientID), sizeSent);
 
 			// If the data wasn't fully sent
@@ -229,21 +232,71 @@ void Server::listen()
 			machines[clientID]->ip = client->getRemoteAddress();
 			machines[clientID]->port = 0;
 
-			// TODO: Implement timeouts for handshakes rather than while loops
 			sf::Socket::Status status = sf::Socket::NotReady;
-			std::cout << "Confirming client's UDP port... ";
+			std::cout << "Confirming client's UDP port... " << std::flush;
 
 			// Ensuring that the packet was recieved
-			while (status == sf::Socket::NotReady || conf == UNCONFIRMED)
+			timeout.restart();
+			while (status == sf::Socket::NotReady)
 			{
+				if(timeout.getElapsedTime().asMilliseconds() >= 1000)
+				{
+					std::cerr << "ERROR: Confirming the client's UDP port timed out!" << std::endl;
+					return;	// TODO: Proper error handling rather than just bailing
+				}
+
 				status = playerSocket.receive(&conf, sizeof(conf), sizeReceived,
 						 machines[clientID]->ip, machines[clientID]->port);
 			}
 
+			std::cout << "OK!" << std::endl;
+			std::cout << "Sending the current server time to the client..." << std::flush;
+
+			status = sf::Socket::NotReady;
+			timeout.restart();
+			pingClock.restart();
+
+			while(status == sf::Socket::NotReady)
+			{
+				// Updating if we need to resend for accuracy.
+				conf = clock.getElapsedTime().asMilliseconds();
+				if(timeout.getElapsedTime().asMilliseconds() >= 1000)
+				{
+					std::cerr << "ERROR: Sending the server time to the client timed out!" << std::endl;
+					return;
+				}
+
+				status = playerSocket.send(&conf, sizeof(conf),
+						 machines[clientID]->ip, machines[clientID]->port);
+			}
+
+			std::cout << "OK!" << std::endl;
+			std::cout << "Getting ping time..." << std::flush;
+			status = sf::Socket::NotReady;
+			timeout.restart();
+
+			while(status == sf::Socket::NotReady)
+			{
+				if(timeout.getElapsedTime().asMilliseconds() >= 1000)
+				{
+					std::cerr << "ERROR: Reply from the client timed out!" << std::endl;
+					return;
+				}
+
+				status = playerSocket.receive(&conf, sizeof(conf), sizeReceived,
+						 machines[clientID]->ip, machines[clientID]->port);
+			}
+
+			machines[clientID]->pingTime = pingClock.getElapsedTime().asMilliseconds();
+
+			std::cout << "Client measured a ping of " << conf << " ms." << std::endl;
+			std::cout << "Server measured a ping of " << machines[clientID]->pingTime << " ms." << std::endl;
+			/*
+
 			conf = UNCONFIRMED;
 			status = sf::Socket::NotReady;
 			std::cout << "OK!" << std::endl;
-			std::cout << "Sending confirmation to the client... ";
+			std::cout << "Sending confirmation to the client... " << std::flush;
 
 			// Sending a confirmation to the client
 			while (status == sf::Socket::NotReady)
@@ -253,7 +306,7 @@ void Server::listen()
 			}
 
 			std::cout << "OK!" << std::endl;
-			std::cout << "Waiting for client acknowledgement... ";
+			std::cout << "Waiting for client acknowledgement... " << std::flush;
 
 			while (status == sf::Socket::NotReady || conf == UNCONFIRMED)
 			{
@@ -262,6 +315,7 @@ void Server::listen()
 			}
 
 			std::cout << "OK!" << std::endl;
+			*/
 
 		}
 		else

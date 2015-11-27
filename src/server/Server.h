@@ -27,6 +27,7 @@ public:
 		sf::IpAddress ip;
 		unsigned short port;
 		float timeSinceUpdate;
+		sf::Int32 pingTime;
 	};
 
 	Server();

@@ -10,6 +10,8 @@ Client::Client() : windowBounds(640, 640)
 
 	tcpSocket = NULL;
 	udpSocket = NULL;
+	pingTime = -1;
+	serverStartTime = -1;
 	
 	// Loading the assets that we'll be needing
 	imageManager.loadImage("assets/tileSheet.png", "tileSheet");
@@ -103,7 +105,8 @@ int Client::run()
 	{
 		sf::IpAddress confirmedIP;
 		unsigned short confirmedPort;
-		std::cout << "UDP handshake... ";
+		sf::Clock timeout;
+		sf::Clock pingClock;
 
 		// Init the UdpSocket if we're not a spectator
 		udpSocket = new sf::UdpSocket();
@@ -113,12 +116,20 @@ int Client::run()
 		// Clearing the TCP socket since we won't be using it
 		delete tcpSocket;
 		tcpSocket = 0;
+		sf::Int32 conf = 0;
 
-		sf::Uint16 conf = 0;
+		// Sending a packet to tell the server what UDP port the client is using
 		status = udpSocket->send(&conf, sizeof(conf), SERVERIP, SERVERPORT);
+		timeout.restart();
+		pingClock.restart();
 
 		while (status == sf::Socket::NotReady)
 		{
+			if(timeout.getElapsedTime().asMilliseconds() >= 1000)
+			{
+				std::cerr << "Sending UDP confirm packet timed out!" << std::endl;
+				exit(-1); // TODO: Proper error handling rather than just bailing.
+			}
 			status = udpSocket->send(&conf, sizeof(conf), SERVERIP, SERVERPORT);
 		}
 
@@ -127,29 +138,43 @@ int Client::run()
 			// TODO: Handle Errors
 		}
 
-		while (status == sf::Socket::NotReady || conf == 0)
+		// Getting the current time from the server
+		timeout.restart();
+		while (status == sf::Socket::NotReady)
 		{
-			status = udpSocket->receive(&conf, sizeof(conf), received,
+			if(timeout.getElapsedTime().asMilliseconds() >= 1000)
+			{
+				std::cerr << "Receiveing server time packet timed out!" << std::endl;
+				exit(-1);
+			}
+
+			status = udpSocket->receive(&serverStartTime, sizeof(serverStartTime), received,
 					 confirmedIP, confirmedPort);
 		}
+		
+		// Establishing a rough ping time with the server
+		pingTime = (pingClock.getElapsedTime().asMilliseconds() / 2);
+		std::cout << "Ping time: " << pingTime << " ms" << std::endl;
+
 		if (status == sf::Socket::Error)
 		{
 			// TODO: Handle Errors
 		}
 
+		// Final response
+		timeout.restart();
 		status = sf::Socket::NotReady;
-		conf = 0;
-
 		while (status == sf::Socket::NotReady)
 		{
-			status = udpSocket->send(&conf, sizeof(conf), SERVERIP, SERVERPORT);
-		}
-		if (status == sf::Socket::Error)
-		{
-			// TODO: Handle Errors
+			if(timeout.getElapsedTime().asMilliseconds() >= 1000)
+			{
+				std::cerr << "Receiveing server time packet timed out!" << std::endl;
+				exit(-1);
+			}
+
+			status = udpSocket->send(&pingTime, sizeof(pingTime), SERVERIP, SERVERPORT);
 		}
 
-		std::cout << "OK!";
 	}
 
 	player->setColour();

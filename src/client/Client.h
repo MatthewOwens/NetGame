@@ -38,6 +38,9 @@ class Client
 		sf::RenderWindow window;
 		sf::Event event;
 
+		sf::Int32 pingTime;
+		sf::Int32 serverStartTime;
+
 		sf::TcpSocket* tcpSocket;
 		sf::UdpSocket* udpSocket;
 
