@@ -26,7 +26,7 @@ class Client
 		void update();
 		void simulatePlayers();
 		void render();
-		inline sf::Int32 serverTime() { return serverStartTime + clock.getElapsedTime().asMilliseconds(); }
+		inline sf::Int32 serverTime() { return serverStartTime + clock.getElapsedTime().asMilliseconds(); + pingTime; }
 	private:
 		bool close = false;
 		bool windowFocus = true;

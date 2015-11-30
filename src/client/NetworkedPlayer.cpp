@@ -1,9 +1,11 @@
 #include "NetworkedPlayer.h"
 #include <SFML/System/Vector2.hpp>
+#include <math.h>
 
 NetworkedPlayer::NetworkedPlayer(PlayerData initialData)
 {
 	data = initialData;
+	interp = NONE;
 
 	// Constructing our boxes based on that initial data
 	sprite.setPosition(data.position);
@@ -36,38 +38,12 @@ NetworkedPlayer::NetworkedPlayer(PlayerData initialData)
 	}
 }
 
-void NetworkedPlayer::update(PlayerData newData)
+void NetworkedPlayer::update()
 {
-	bool attackRight = true;
+	bool attackingRight = true;
 
-	// Updating our data with what we've recieved from the server
-	data = newData;
-
-	// Checking if we were attacking right last frame
 	if (sprite.getPosition().x > atkSprite.getPosition().x)
-		attackRight = false;
-
-	// Ensuring that our sprite positions are correct
-	sprite.setPosition(data.position);
-	atkSprite.setPosition(data.position);
-
-	// Setting the position of our atkSprite based on velocity
-	if (data.velocity.x > 0)
-	{
-			atkSprite.move(sf::Vector2f(32.0f, 0.0f));
-	}
-	else if (data.velocity.x < 0)
-	{
-			atkSprite.move(sf::Vector2f(-32.0f, 0.0f));
-	}
-	else
-	{
-		// If the x velocity is zero, assume no change from the last frame
-		if (attackRight)
-			atkSprite.move(sf::Vector2f(32.0f, 0.0f));
-		else
-			atkSprite.move(sf::Vector2f(-32.0f, 0.0f));
-	}
+		attackingRight = false;
 
 	if (data.atkTimer <= 0.5f && data.atkTimer != 0)
 	{
@@ -83,6 +59,75 @@ void NetworkedPlayer::update(PlayerData newData)
 	{
 		atkSprite.setFillColor(sf::Color(0, 0, 0, 0));
 	}
+
+	switch(interp)
+	{
+		case NONE:
+		{
+			// All good
+			break;
+		}
+		case DESYNC:
+		{
+			// Calculating the velocity required to sync the NetworkPlayer to the
+			// new data
+			sf::Vector2f vel;
+			velocity.x = (data.position.x - position.x);
+			velocity.y = (data.position.y - position.y);
+
+			float magnitude = std::sqrt( std::pow(data.position.x, 2) + std::pow(data.position.y, 2));
+
+			// Normalising the velocity
+			velocity /= magnitude;
+
+			// Increasing the speed
+			velocity *= 2.0f;
+			break;
+		}
+		case PREDICTION:
+		{
+			// Interpolate position for this frame from the history + serverTime()
+			break;
+		}
+	};
+
+	// Updating our sprites
+	sprite.move(velocity);
+	atkSprite.setPosition(sprite.getPosition());
+	position += velocity;
+
+	// Updating our atkSprite
+	if(velocity.x > 0)
+	{
+		atkSprite.move(0.0f, 32.0f);
+	}
+	else if(velocity.x < 0)
+	{
+		atkSprite.move(0.0f, -32.0f);
+	}
+	else	// If we wern't moving, use info from last frame
+	{
+		if(attackingRight)
+			atkSprite.move(0.0f, 32.0f);
+		else
+			atkSprite.move(0.0f, -32.0f);
+	}
+}
+
+void NetworkedPlayer::updateData(PlayerData newData)
+{
+	bool attackRight = true;
+	interp = DESYNC;
+
+	// Updating our history
+	history.push_back(data);
+
+	if(history.size() >= MAX_HISTORY)
+		history.pop_front();
+
+	// Updating our data with what we've recieved from the server
+	data = newData;
+
 }
 
 void NetworkedPlayer::render(sf::RenderWindow& window)

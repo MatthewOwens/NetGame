@@ -291,10 +291,17 @@ void Client::update()
 				// Updating our data for the other player if it's newer
 				if (incomingData.updateTime > otherPlayers[id]->getUpdateTime())
 				{
-					otherPlayers[id]->update(incomingData);
+					otherPlayers[id]->updateData(incomingData);
 				}
 			}
 		}
+	}
+
+	// Updating our simulated players
+	for(int i = 0; i < 3; ++i)
+	{
+		if(otherPlayers[i] != NULL)
+			otherPlayers[i]->update();
 	}
 }
 

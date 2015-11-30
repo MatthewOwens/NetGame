@@ -31,7 +31,6 @@ int Server::run()
 
 	while (true)
 	{
-		std::cout << clock.getElapsedTime().asMilliseconds() << std::endl;
 		//if(selector.wait(sf::miliseconds(100)))
 		if (selector.wait())
 		{
