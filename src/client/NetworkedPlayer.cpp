@@ -94,18 +94,18 @@ void NetworkedPlayer::update()
 	// Updating our atkSprite
 	if(velocity.x > 0)
 	{
-		atkSprite.move(0.0f, 32.0f);
+		atkSprite.move(32.0f, 0.0f);
 	}
 	else if(velocity.x < 0)
 	{
-		atkSprite.move(0.0f, -32.0f);
+		atkSprite.move(-32.0f, 0.0f);
 	}
 	else	// If we wern't moving, use info from last frame
 	{
 		if(attackingRight)
-			atkSprite.move(0.0f, 32.0f);
+			atkSprite.move(32.0f, 0.0f);
 		else
-			atkSprite.move(0.0f, -32.0f);
+			atkSprite.move(-32.0f, 0.0f);
 	}
 }
 
