@@ -1,6 +1,7 @@
 #include "NetworkedPlayer.h"
 #include <SFML/System/Vector2.hpp>
 #include <math.h>
+#include <iostream>
 
 NetworkedPlayer::NetworkedPlayer(PlayerData initialData)
 {
@@ -64,7 +65,9 @@ void NetworkedPlayer::update()
 	{
 		case NONE:
 		{
-			// All good
+			velocity = data.velocity;
+			position = data.position;
+			sprite.setPosition(position);
 			break;
 		}
 		case DESYNC:
@@ -117,7 +120,20 @@ void NetworkedPlayer::update()
 void NetworkedPlayer::updateData(PlayerData newData)
 {
 	bool attackRight = true;
-	interp = DESYNC;
+
+	sf::Vector2f diff = newData.position - position;
+
+	// TODO: Figure out this odd diff issue
+	if(std::abs(diff.x) + std::abs(diff.y) <= 12)
+		interp = DESYNC;
+	else
+	{
+		std::cout << "Snapping" << std::endl;
+		/*std::cout << "Diff: " << std::abs(diff.x) + std::abs(diff.y) << std::endl;
+		std::cout << "newDataPos: (" << newData.position.x << "," << newData.position.y << ")" << std::endl;
+		std::cout << "pos: (" << position.x << "," << position.y << ")" << std::endl;*/
+		interp = NONE;	// Diff too large, snap
+	}
 
 	// Updating our history
 	history.push_back(data);
