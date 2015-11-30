@@ -26,15 +26,17 @@ class Client
 		void update();
 		void simulatePlayers();
 		void render();
-
+		inline sf::Int32 serverTime() { return serverStartTime + clock.getElapsedTime().asMilliseconds(); }
 	private:
 		bool close = false;
 		bool windowFocus = true;
+		bool sendUpdate = false;
 		const sf::Vector2i windowBounds;
 
 		InputManager inputManager;
 		ImageManager imageManager;
 		sf::Clock updateClock;
+		sf::Clock clock;
 		sf::RenderWindow window;
 		sf::Event event;
 

@@ -31,9 +31,7 @@ int Server::run()
 
 	while (true)
 	{
-		// Checking if we've quit
-		// TODO: Non-blocking or threaded keyboard input
-
+		std::cout << clock.getElapsedTime().asMilliseconds() << std::endl;
 		//if(selector.wait(sf::miliseconds(100)))
 		if (selector.wait())
 		{
@@ -250,7 +248,8 @@ void Server::listen()
 			}
 
 			std::cout << "OK!" << std::endl;
-			std::cout << "Sending the current server time to the client..." << std::flush;
+			//std::cout << "Sending the current server time to the client..." << std::flush;
+			std::cout << "Sending " << conf << " as the current server time..." << std::flush;
 
 			status = sf::Socket::NotReady;
 			timeout.restart();
@@ -271,7 +270,7 @@ void Server::listen()
 			}
 
 			std::cout << "OK!" << std::endl;
-			std::cout << "Getting ping time..." << std::flush;
+			std::cout << "Getting client ping time..." << std::flush;
 			status = sf::Socket::NotReady;
 			timeout.restart();
 
@@ -289,7 +288,7 @@ void Server::listen()
 
 			machines[clientID]->pingTime = pingClock.getElapsedTime().asMilliseconds();
 
-			std::cout << "Client measured a ping of " << conf << " ms." << std::endl;
+			std::cout << conf << " ms!" << std::endl;
 			std::cout << "Server measured a ping of " << machines[clientID]->pingTime << " ms." << std::endl;
 			/*
 

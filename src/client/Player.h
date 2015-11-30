@@ -14,7 +14,7 @@ class Player
 		Player();
 		Player(InputManager* input);
 		~Player();
-		void update(Tile** tiles, std::vector<sf::RectangleShape>& collisions);
+		bool update(Tile** tiles, std::vector<sf::RectangleShape>& collisions);
 		void render(sf::RenderWindow& window);
 		void setColour();
 		sf::Int8& getID() {return playerData.clientID; }

@@ -140,6 +140,7 @@ int Client::run()
 
 		// Getting the current time from the server
 		timeout.restart();
+		status = sf::Socket::NotReady;
 		while (status == sf::Socket::NotReady)
 		{
 			if(timeout.getElapsedTime().asMilliseconds() >= 1000)
@@ -151,6 +152,8 @@ int Client::run()
 			status = udpSocket->receive(&serverStartTime, sizeof(serverStartTime), received,
 					 confirmedIP, confirmedPort);
 		}
+
+		std::cout << "Received a current time of " << serverStartTime << " from the server!" << std::endl;
 		
 		// Establishing a rough ping time with the server
 		pingTime = (pingClock.getElapsedTime().asMilliseconds() / 2);
@@ -178,6 +181,7 @@ int Client::run()
 	}
 
 	player->setColour();
+	clock.restart();
 
 	// Our actual game loop
 	while(!close)
@@ -241,10 +245,11 @@ void Client::update()
 		}
 	}
 
-	player->update(tiles, collisions);
+	sendUpdate = player->update(tiles, collisions);
 
 	// Checking if we should send an update packet
-	if (updateClock.getElapsedTime().asMilliseconds() >= 20)
+	//if (updateClock.getElapsedTime().asMilliseconds() >= 20)
+	if(sendUpdate)
 	{
 		player->getData().updateTime += updateClock.getElapsedTime().asMilliseconds();
 		if (player->getAttacking())

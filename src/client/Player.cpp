@@ -33,11 +33,13 @@ Player::~Player()
 {
 }
 
-void Player::update(Tile** tiles, std::vector<sf::RectangleShape>& collisions)
+bool Player::update(Tile** tiles, std::vector<sf::RectangleShape>& collisions)
 {
 	// Don't update if pointers are null
 	if (inputManager == NULL)
-		return;
+		return false;
+
+	bool pushUpdate = false;
 
 	// Grabbing our position on the grid for this frame
 	int gridX = (playerData.position.x + 16) / Tile::getSize();
@@ -53,6 +55,7 @@ void Player::update(Tile** tiles, std::vector<sf::RectangleShape>& collisions)
 		{
 			atkSprite.setPosition(playerData.position);
 			atkSprite.move(-Tile::getSize(), 0);
+			pushUpdate = true;
 		}
 	}
 	if (inputManager->keyHeld("right"))
@@ -64,6 +67,7 @@ void Player::update(Tile** tiles, std::vector<sf::RectangleShape>& collisions)
 		{
 			atkSprite.setPosition(playerData.position);
 			atkSprite.move(Tile::getSize(), 0);
+			pushUpdate = true;
 		}
 	}
 
@@ -80,6 +84,7 @@ void Player::update(Tile** tiles, std::vector<sf::RectangleShape>& collisions)
 		if(playerData.velocity.y == 0.0f)
 		{
 			playerData.velocity.y = -7.5f;
+			pushUpdate = true;
 		}
 	}
 
@@ -89,6 +94,7 @@ void Player::update(Tile** tiles, std::vector<sf::RectangleShape>& collisions)
 		{
 			//playerData.state = (sf::Int32)playerData.SWING;
 			attacking = true;
+			pushUpdate = true;
 			atkTimer.restart();
 		}
 	}
@@ -98,7 +104,10 @@ void Player::update(Tile** tiles, std::vector<sf::RectangleShape>& collisions)
 
 	// If the tile under us is air
 	if(tiles[gridX][gridY + 1].getID() == 0)
+	{
 		playerData.velocity.y += speed / 10;	// Fall
+		pushUpdate = true;
+	}
 	else
 	{
 		// Check if we're intersecting
