@@ -77,14 +77,6 @@ void NetworkedPlayer::update()
 			sf::Vector2f vel;
 			velocity.x = (data.position.x - position.x);
 			velocity.y = (data.position.y - position.y);
-
-			float magnitude = std::sqrt( std::pow(data.position.x, 2) + std::pow(data.position.y, 2));
-
-			// Normalising the velocity
-			velocity /= magnitude;
-
-			// Increasing the speed
-			velocity *= 2.0f;
 			break;
 		}
 		case PREDICTION:
