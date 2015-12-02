@@ -346,8 +346,6 @@ void Client::update()
 							if(replyTimer.getElapsedTime().asMilliseconds() == 1000)
 								std::cout << "Ping reply took way too long!" << std::endl;
 						}
-
-						std::cout << "Server has a ping of " << ping << " ms" << std::endl;
 						break;
 					}
 					default:

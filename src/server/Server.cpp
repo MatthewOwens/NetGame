@@ -418,7 +418,6 @@ void Server::pingPlayers()
 
 			// Recording the ping time
 			machines[i]->timeSinceUpdate = pingTimer.getElapsedTime().asMilliseconds();
-			std::cout << "Ping for client " << i << " set to " << machines[i]->timeSinceUpdate << std::endl;
 		}
 	}
 }
