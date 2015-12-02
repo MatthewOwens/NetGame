@@ -251,7 +251,8 @@ void Client::update()
 	//if (updateClock.getElapsedTime().asMilliseconds() >= 20)
 	if(sendUpdate)
 	{
-		player->getData().updateTime += updateClock.getElapsedTime().asMilliseconds();
+		player->getData().updateTime = serverTime();
+
 		if (player->getAttacking())
 			player->getData().atkTimer = player->getAtkTime();
 		else
@@ -291,7 +292,7 @@ void Client::update()
 				// Updating our data for the other player if it's newer
 				if (incomingData.updateTime > otherPlayers[id]->getUpdateTime())
 				{
-					otherPlayers[id]->updateData(incomingData);
+					otherPlayers[id]->updateData(incomingData, serverTime());
 				}
 			}
 		}
@@ -301,7 +302,7 @@ void Client::update()
 	for(int i = 0; i < 3; ++i)
 	{
 		if(otherPlayers[i] != NULL)
-			otherPlayers[i]->update();
+			otherPlayers[i]->update(serverTime());
 	}
 }
 

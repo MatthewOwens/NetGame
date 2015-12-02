@@ -12,8 +12,8 @@ public:
 	enum InterpolationState { NONE, DESYNC, PREDICTION };
 	NetworkedPlayer(PlayerData initialData);
 	~NetworkedPlayer();
-	void updateData(PlayerData newData);
-	void update();
+	void updateData(PlayerData newData, float clientTime);
+	bool update(float clientTime);
 	void render(sf::RenderWindow& window);
 
 	inline const PlayerData& getData() { return data; };

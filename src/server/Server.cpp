@@ -44,7 +44,6 @@ int Server::run()
 				checkClients();
 			}
 		}
-
 		frameClock.restart();
 	}
 

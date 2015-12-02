@@ -8,6 +8,10 @@ NetworkedPlayer::NetworkedPlayer(PlayerData initialData)
 	data = initialData;
 	interp = NONE;
 
+	// Filling our history to avoid issues later
+	/*for(int i = 0; i < MAX_HISTORY; ++i)
+		history.push_back(PlayerData());*/
+
 	// Constructing our boxes based on that initial data
 	sprite.setPosition(data.position);
 	sprite.setSize(sf::Vector2f(32.0f, 32.0f));
@@ -39,7 +43,7 @@ NetworkedPlayer::NetworkedPlayer(PlayerData initialData)
 	}
 }
 
-void NetworkedPlayer::update()
+bool NetworkedPlayer::update(float clientTime)
 {
 	bool attackingRight = true;
 
@@ -59,6 +63,15 @@ void NetworkedPlayer::update()
 	if (data.atkTimer >= 0.7f || data.atkTimer == 0)
 	{
 		atkSprite.setFillColor(sf::Color(0, 0, 0, 0));
+	}
+
+	// Checking if we should extrapolate our position
+	if(history.size() != 0)
+	{
+		if(clientTime - history.back().updateTime >= 2500)
+		{
+			interp = PREDICTION;
+		}
 	}
 
 	switch(interp)
@@ -81,8 +94,16 @@ void NetworkedPlayer::update()
 		}
 		case PREDICTION:
 		{
-			// Interpolate position for this frame from the history + serverTime()
+			// Extrapolate position for this frame from the history + serverTime()
+			sf::Vector2f acceleration;
+			PlayerData* histBack = &history.back();
+
+			// Calculating our accelleration based on our recent history
+			acceleration.x = (histBack->position.x + (histBack - 1)->position.x) / (histBack->updateTime - (histBack - 1)->updateTime);
+			acceleration.y = (histBack->position.y + (histBack - 1)->position.y) / (histBack->updateTime - (histBack - 1)->updateTime);
 			break;
+
+			velocity += acceleration;
 		}
 	};
 
@@ -107,13 +128,23 @@ void NetworkedPlayer::update()
 		else
 			atkSprite.move(-32.0f, 0.0f);
 	}
+
+	return true;
 }
 
-void NetworkedPlayer::updateData(PlayerData newData)
+void NetworkedPlayer::updateData(PlayerData newData, float clientTime)
 {
 	bool attackRight = true;
 
 	sf::Vector2f diff = newData.position - position;
+	float timeDiff = (clientTime - newData.updateTime);
+
+	// Increasing atkTimer to compensate for latency
+	/*if(newData.atkTimer != 0)
+	{
+		std::cout << "Increasing atkTimer by " << 1 / (clientTime - newData.updateTime) << std::endl;
+		newData.atkTimer += 1 / (clientTime - newData.updateTime);
+	}*/
 
 	// TODO: Figure out this odd diff issue
 	if(std::abs(diff.x) + std::abs(diff.y) <= 12)
@@ -121,9 +152,6 @@ void NetworkedPlayer::updateData(PlayerData newData)
 	else
 	{
 		std::cout << "Snapping" << std::endl;
-		/*std::cout << "Diff: " << std::abs(diff.x) + std::abs(diff.y) << std::endl;
-		std::cout << "newDataPos: (" << newData.position.x << "," << newData.position.y << ")" << std::endl;
-		std::cout << "pos: (" << position.x << "," << position.y << ")" << std::endl;*/
 		interp = NONE;	// Diff too large, snap
 	}
 
