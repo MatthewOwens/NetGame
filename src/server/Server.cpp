@@ -43,7 +43,7 @@ int Server::run()
 			else
 			{
 				checkClients();
-				pingPlayers();
+				//pingPlayers();
 			}
 		}
 		frameClock.restart();
