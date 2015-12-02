@@ -39,6 +39,7 @@ private:
 	void listen();
 	void checkClients();
 	void announceDisconnect(sf::Int8 clientID);
+	void pingPlayers();
 
 private:
 	sf::IpAddress serverIP;

@@ -93,11 +93,30 @@ int Client::run()
 	// Getting our ID from the server
 	std::size_t received = 0;
 	sf::Socket::Status status;
+	sf::Clock tcpTimeout;
 
 	status = tcpSocket->receive(&player->getID(), sizeof(player->getID()), received);
 
 	while(status != sf::Socket::Done)
+	{
 		status = tcpSocket->receive(&player->getID(), sizeof(player->getID()), received);
+
+		if(status == sf::Socket::Error)
+		{
+			#ifdef __linux__
+			std::cout << "Error: " << errno << std::endl;
+			#elif __WIN32
+			std::cout << "aah!" << std::endl;
+			#endif
+		   	exit(-1);
+		}
+
+		if(tcpTimeout.getElapsedTime().asMilliseconds() >= 5000)
+		{
+			std::cout << "Error: Could not establish connection with the server!" << std::endl;
+			exit(-1);
+		}
+	}
 
 	std::cout << "Connected successfully, client ID of " << (int)player->getID() << " was assigned!" << std::endl;
 
@@ -312,9 +331,28 @@ void Client::update()
 						}
 						break;
 					}
+					case(2):
+					{
+						// Ping packet, just throw it back
+						status = sf::Socket::NotReady;
+						sf::Clock replyTimer;
+						float ping;
+
+						packet >> ping;
+						while(status == sf::Socket::NotReady)
+						{
+							status = udpSocket->send(packet, SERVERIP, SERVERPORT);
+
+							if(replyTimer.getElapsedTime().asMilliseconds() == 1000)
+								std::cout << "Ping reply took way too long!" << std::endl;
+						}
+
+						std::cout << "Server has a ping of " << ping << " ms" << std::endl;
+						break;
+					}
 					default:
 					{
-						std::cout << "Error: " << header << " is an unknown header!" << std::endl;
+						std::cout << "Error: " << (int)header << " is an unknown header!" << std::endl;
 						break;
 					}
 				};

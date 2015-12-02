@@ -23,6 +23,7 @@ int Server::run()
 	}
 
 	serverSocket.setBlocking(false);
+	playerSocket.setBlocking(false);
 
 	// Populating our socket selector
 	selector.add(serverSocket);
@@ -42,6 +43,7 @@ int Server::run()
 			else
 			{
 				checkClients();
+				pingPlayers();
 			}
 		}
 		frameClock.restart();
@@ -359,6 +361,64 @@ void Server::announceDisconnect(sf::Int8 clientID)
 		if(machines[i] != NULL)
 		{
 			playerSocket.send(packet, machines[i]->ip, machines[i]->port);
+		}
+	}
+}
+
+void Server::pingPlayers()
+{
+	for(int i = 0; i < MAX_PLAYERS; ++i)
+	{
+		if(machines[i] != NULL)
+		{
+			sf::Packet packet;
+			sf::Int8 header = 2;
+			sf::Socket::Status status = sf::Socket::NotReady;
+			packet << header;
+
+			sf::IpAddress ip;
+			short unsigned int port;
+
+			sf::Clock pingTimer;
+
+			if(packet << machines[i]->timeSinceUpdate)
+			{
+				while(status == sf::Socket::NotReady)
+				{
+					status = playerSocket.send(packet, machines[i]->ip, machines[i]->port);
+					if(pingTimer.getElapsedTime().asMilliseconds() >= DISCONNECT_TIME_MS)
+					{
+						machines[i]->timeSinceUpdate += DISCONNECT_TIME_MS;
+						std::cout << "Ping for client " << i << " timed out!" << std::endl;
+						break;
+					}
+				}
+			}
+			else
+			{
+				std::cout << "Ping packet insertion failed!" << std::endl;
+			}
+
+			status = sf::Socket::NotReady;
+			while(status == sf::Socket::NotReady)
+			{
+				status = playerSocket.receive(packet, ip, port);
+
+				if(pingTimer.getElapsedTime().asMilliseconds() >= DISCONNECT_TIME_MS)
+				{
+					machines[i]->timeSinceUpdate += DISCONNECT_TIME_MS;
+					std::cout << "Ping for client " << i << " timed out!" << std::endl;
+					break;
+				}
+
+				// If the packet isn't from the expected client, ignore it
+				if(!(ip == machines[i]->ip && port == machines[i]->port))
+					status = sf::Socket::NotReady;
+			}
+
+			// Recording the ping time
+			machines[i]->timeSinceUpdate = pingTimer.getElapsedTime().asMilliseconds();
+			std::cout << "Ping for client " << i << " set to " << machines[i]->timeSinceUpdate << std::endl;
 		}
 	}
 }
