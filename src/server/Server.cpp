@@ -57,9 +57,12 @@ void Server::checkClients()
 	{
 		if(machines[i] != NULL)
 		{
+			// This is never going to be called, timeSinceUpdate isn't incremented.
+			// Even if it was, it wouldn't be representative of the latency.
 			if(machines[i]->timeSinceUpdate >= DISCONNECT_TIME_MS)
 			{
 				std::cout << "Client " << i + 1 << " has timed out!" << std::endl;
+				announceDisconnect(i);
 
 				delete players[i];
 				delete machines[i];
@@ -89,19 +92,17 @@ void Server::checkClients()
 			// If the client disconnected
 			if (recieved == 0)
 			{
-				std::cout << "Client disconnected" << std::endl;
-
 				for (int i = 0; i < MAX_PLAYERS; ++i)
 				{
 					// Freeing up the player and machine data of the
 					// client that disconnected.
-
-					// TODO: Handle random disconnects
 					if (machines[i] != NULL)
 					{
 						if (sender == machines[i]->ip &&
 							port == machines[i]->port)
 						{
+							std::cout << "Client " << i + 1 << " disconnected (quit)" << std::endl;
+							announceDisconnect(i);
 							delete machines[i];
 							delete players[i];
 
@@ -115,7 +116,6 @@ void Server::checkClients()
 			{
 				// Client connected alright
 				PlayerData incomingData;
-
 				if (packet >> incomingData)
 				{
 					int id = incomingData.clientID;
@@ -124,6 +124,13 @@ void Server::checkClients()
 					if (incomingData.updateTime > players[id]->updateTime)
 					{
 						*players[id] = incomingData;
+
+						// Appending a header to the packet, so the client can differentiate them
+						packet.clear();
+						sf::Int8 header = 1;
+						//packet << header << *players[id];
+						if(!(packet << header << *players[id]))
+							std::cout << "Error attatching header!" << std::endl;
 
 						// Pushing out the update to our remaining clients
 						for (int i = 0; i < MAX_PLAYERS; ++i)
@@ -339,6 +346,20 @@ void Server::listen()
 	{
 		// We didn't get a new connection, delete the socket
 		delete client;
+	}
+}
+
+void Server::announceDisconnect(sf::Int8 clientID)
+{
+	sf::Packet packet;
+	sf::Int8 header = 0;
+	packet << header << clientID;
+	for(int i = 0; i < MAX_PLAYERS; ++i)
+	{
+		if(machines[i] != NULL)
+		{
+			playerSocket.send(packet, machines[i]->ip, machines[i]->port);
+		}
 	}
 }
 

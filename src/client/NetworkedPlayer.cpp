@@ -171,3 +171,7 @@ void NetworkedPlayer::render(sf::RenderWindow& window)
 	window.draw(sprite);
 	window.draw(atkSprite);
 }
+
+NetworkedPlayer::~NetworkedPlayer()
+{
+}

@@ -38,6 +38,7 @@ public:
 private:
 	void listen();
 	void checkClients();
+	void announceDisconnect(sf::Int8 clientID);
 
 private:
 	sf::IpAddress serverIP;

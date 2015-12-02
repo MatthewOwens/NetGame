@@ -279,21 +279,45 @@ void Client::update()
 		// Only bother with the packet if it was actually from the server
 		if (remoteIP == SERVERIP && remotePort == SERVERPORT)
 		{
-			PlayerData incomingData;
+			sf::Int8 header = -1;
 
-			if (packet >> incomingData)
+			if(packet >> header)
 			{
-				int id = incomingData.clientID;
-
-				// Creating a new NetworkedPlayer if we've got a new client
-				if (otherPlayers[id] == NULL)
-					otherPlayers[id] = new NetworkedPlayer(incomingData);
-
-				// Updating our data for the other player if it's newer
-				if (incomingData.updateTime > otherPlayers[id]->getUpdateTime())
+				switch(header)
 				{
-					otherPlayers[id]->updateData(incomingData, serverTime());
-				}
+					case(0):
+					{
+						sf::Int8 disconnectedClient;
+						packet >> disconnectedClient;
+						std::cout << "Client " << (int)disconnectedClient + 1<< " has disconnected!" << std::endl;
+
+						delete otherPlayers[disconnectedClient];
+						otherPlayers[disconnectedClient] = NULL;
+						break;
+					}
+					case(1):
+					{
+						PlayerData incomingData;
+						packet >> incomingData;
+
+						int id = incomingData.clientID;
+						// Creating a new NetworkedPlayer if we've got a new client
+						if (otherPlayers[id] == NULL)
+							otherPlayers[id] = new NetworkedPlayer(incomingData);
+
+						// Updating our data for the other player if it's newer
+						if (incomingData.updateTime > otherPlayers[id]->getUpdateTime())
+						{
+							otherPlayers[id]->updateData(incomingData, serverTime());
+						}
+						break;
+					}
+					default:
+					{
+						std::cout << "Error: " << header << " is an unknown header!" << std::endl;
+						break;
+					}
+				};
 			}
 		}
 	}
