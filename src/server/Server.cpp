@@ -43,7 +43,7 @@ int Server::run()
 			else
 			{
 				checkClients();
-				//pingPlayers();
+				pingPlayers();
 			}
 		}
 		frameClock.restart();
@@ -118,49 +118,80 @@ void Server::checkClients()
 			{
 				// Client connected alright
 				PlayerData incomingData;
-				if (packet >> incomingData)
-				{
-					int id = incomingData.clientID;
+				sf::Int8 header;
 
-					// Updating our data for a client if this packet was newer
-					if (incomingData.updateTime > players[id]->updateTime)
+				// Getting our header
+				if(packet >> header)
+				{	 
+					switch(header)
 					{
-						*players[id] = incomingData;
-
-						// Appending a header to the packet, so the client can differentiate them
-						packet.clear();
-						sf::Int8 header = 1;
-						//packet << header << *players[id];
-						if(!(packet << header << *players[id]))
-							std::cout << "Error attatching header!" << std::endl;
-
-						// Pushing out the update to our remaining clients
-						for (int i = 0; i < MAX_PLAYERS; ++i)
+						// Data packet
+						case(1):
 						{
-							// Only sending the update to valid clients
-							if (i != id && players[i] != NULL)
-							{
-								status = playerSocket.send(packet, machines[i]->ip, machines[i]->port);
+							if (packet >> incomingData)
+							{	 
+								int id = incomingData.clientID;
 
-								if (status == sf::Socket::NotReady)
+								// Updating our data for a client if this packet was newer
+								if (incomingData.updateTime > players[id]->updateTime)
 								{
-									std::cout << "NOT_READY" << std::endl;
-									status = playerSocket.send(packet, machines[i]->ip, machines[i]->port);
+									*players[id] = incomingData;
+
+									// Appending a header to the packet, so the client can differentiate them
+									packet.clear();
+									//sf::Int8 header = 1;
+									//packet << header << *players[id];
+									if(!(packet << header << *players[id]))
+										std::cout << "Error attatching header!" << std::endl;
+
+									// Pushing out the update to our remaining clients
+									for (int i = 0; i < MAX_PLAYERS; ++i)
+									{
+										// Only sending the update to valid clients
+										if (i != id && players[i] != NULL)
+										{
+											status = playerSocket.send(packet, machines[i]->ip, machines[i]->port);
+
+											if (status == sf::Socket::NotReady)
+											{
+												std::cout << "NOT_READY" << std::endl;
+												status = playerSocket.send(packet, machines[i]->ip, machines[i]->port);
+											}
+
+											if (status == sf::Socket::Error)
+											{
+												// TODO: Error handling
+												std::cout << "Error sending sf::packet" << std::endl;
+											}
+										}
+									}
 								}
-
-								if (status == sf::Socket::Error)
+								else
 								{
-									// TODO: Error handling
-									std::cout << "Error sending sf::packet" << std::endl;
+									std::cout << "Old packet!" << std::endl;
+									std::cout << "\t Current: " << players[id]->updateTime << std::endl;
+									std::cout << "\t New: " << incomingData.updateTime << std::endl;
 								}
 							}
+							break;
 						}
-					}
-					else
-					{
-						std::cout << "Old packet!" << std::endl;
-						std::cout << "\t Current: " << players[id]->updateTime << std::endl;
-						std::cout << "\t New: " << incomingData.updateTime << std::endl;
+						// Ping packet
+						case(2):
+						{
+							// Figuring out what machine the packet came from
+							int i = 0;
+							for(; i < MAX_PLAYERS; ++i)
+							{
+								if(machines[i]->ip == sender && machines[i]->port == port)
+									break;
+							}
+
+							if(i != MAX_PLAYERS)
+							{
+								machines[i]->pingTime = machines[i]->pingClock.restart().asMilliseconds();
+								machines[i]->timeSinceUpdate = 0;
+							}
+						}
 					}
 				}
 				else
@@ -371,53 +402,58 @@ void Server::pingPlayers()
 	{
 		if(machines[i] != NULL)
 		{
-			sf::Packet packet;
-			sf::Int8 header = 2;
-			sf::Socket::Status status = sf::Socket::NotReady;
-			packet << header;
-
-			sf::IpAddress ip;
-			short unsigned int port;
-
-			sf::Clock pingTimer;
-
-			if(packet << machines[i]->timeSinceUpdate)
+			// Ensuring that we're not pinging each frame
+			if(machines[i]->pingClock.getElapsedTime().asMilliseconds() >= 100)
 			{
+				sf::Packet packet;
+				sf::Int8 header = 2;
+				sf::Socket::Status status = sf::Socket::NotReady;
+				packet << header;
+
+				sf::IpAddress ip;
+				short unsigned int port;
+
+				sf::Clock pingTimer;
+
+				if(packet << machines[i]->timeSinceUpdate)
+				{
+					while(status == sf::Socket::NotReady)
+					{
+						status = playerSocket.send(packet, machines[i]->ip, machines[i]->port);
+						if(pingTimer.getElapsedTime().asMilliseconds() >= DISCONNECT_TIME_MS)
+						{
+							machines[i]->timeSinceUpdate += DISCONNECT_TIME_MS;
+							std::cout << "Ping for client " << i << " timed out!" << std::endl;
+							break;
+						}
+					}
+				}
+				else
+				{
+					std::cout << "Ping packet insertion failed!" << std::endl;
+				}
+
+				status = sf::Socket::NotReady;
 				while(status == sf::Socket::NotReady)
 				{
-					status = playerSocket.send(packet, machines[i]->ip, machines[i]->port);
+					status = playerSocket.receive(packet, ip, port);
+
 					if(pingTimer.getElapsedTime().asMilliseconds() >= DISCONNECT_TIME_MS)
 					{
 						machines[i]->timeSinceUpdate += DISCONNECT_TIME_MS;
 						std::cout << "Ping for client " << i << " timed out!" << std::endl;
 						break;
 					}
-				}
-			}
-			else
-			{
-				std::cout << "Ping packet insertion failed!" << std::endl;
-			}
 
-			status = sf::Socket::NotReady;
-			while(status == sf::Socket::NotReady)
-			{
-				status = playerSocket.receive(packet, ip, port);
-
-				if(pingTimer.getElapsedTime().asMilliseconds() >= DISCONNECT_TIME_MS)
-				{
-					machines[i]->timeSinceUpdate += DISCONNECT_TIME_MS;
-					std::cout << "Ping for client " << i << " timed out!" << std::endl;
-					break;
+					// If the packet isn't from the expected client, ignore it
+					if(!(ip == machines[i]->ip && port == machines[i]->port))
+						status = sf::Socket::NotReady;
 				}
 
-				// If the packet isn't from the expected client, ignore it
-				if(!(ip == machines[i]->ip && port == machines[i]->port))
-					status = sf::Socket::NotReady;
+				// Recording the ping time
+				machines[i]->timeSinceUpdate = pingTimer.getElapsedTime().asMilliseconds();
+				machines[i]->pingClock.restart();
 			}
-
-			// Recording the ping time
-			machines[i]->timeSinceUpdate = pingTimer.getElapsedTime().asMilliseconds();
 		}
 	}
 }

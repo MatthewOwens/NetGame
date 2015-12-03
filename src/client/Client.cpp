@@ -270,6 +270,8 @@ void Client::update()
 	//if (updateClock.getElapsedTime().asMilliseconds() >= 20)
 	if(sendUpdate)
 	{
+		sf::Int8 header = 1;
+
 		player->getData().updateTime = serverTime();
 
 		if (player->getAttacking())
@@ -277,7 +279,7 @@ void Client::update()
 		else
 			player->getData().atkTimer = 0.0f;
 
-		packet << player->getData();
+		packet << header << player->getData();
 		status = udpSocket->send(packet, SERVERIP, SERVERPORT);
 
 		if (status == sf::Socket::Done)
@@ -333,12 +335,14 @@ void Client::update()
 					}
 					case(2):
 					{
-						// Ping packet, just throw it back
+						// Ping packet, extract the info and throw it back
 						status = sf::Socket::NotReady;
 						sf::Clock replyTimer;
-						float ping;
+						packet >> pingTime;
 
-						packet >> ping;
+						if(!(packet << header << pingTime))
+							std::cout << "Error creating ping packet!" << std::endl;
+
 						while(status == sf::Socket::NotReady)
 						{
 							status = udpSocket->send(packet, SERVERIP, SERVERPORT);

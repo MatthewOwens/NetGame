@@ -28,6 +28,7 @@ public:
 		unsigned short port;
 		float timeSinceUpdate;
 		sf::Int32 pingTime;
+		sf::Clock pingClock;
 	};
 
 	Server();
