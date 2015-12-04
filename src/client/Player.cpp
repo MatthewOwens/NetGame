@@ -39,7 +39,7 @@ bool Player::update(Tile** tiles, std::vector<sf::RectangleShape>& collisions)
 	if (inputManager == NULL)
 		return false;
 
-	bool pushUpdate = false;
+	bool pushUpdate = true;
 
 	// Grabbing our position on the grid for this frame
 	int gridX = (playerData.position.x + 16) / Tile::getSize();
@@ -55,7 +55,6 @@ bool Player::update(Tile** tiles, std::vector<sf::RectangleShape>& collisions)
 		{
 			atkSprite.setPosition(playerData.position);
 			atkSprite.move(-Tile::getSize(), 0);
-			pushUpdate = true;
 		}
 	}
 	if (inputManager->keyHeld("right"))
@@ -67,7 +66,6 @@ bool Player::update(Tile** tiles, std::vector<sf::RectangleShape>& collisions)
 		{
 			atkSprite.setPosition(playerData.position);
 			atkSprite.move(Tile::getSize(), 0);
-			pushUpdate = true;
 		}
 	}
 
@@ -76,6 +74,7 @@ bool Player::update(Tile** tiles, std::vector<sf::RectangleShape>& collisions)
 	{
 		playerData.velocity.x = 0.0f;
 		playerData.state = (sf::Int32)playerData.IDLE;
+		pushUpdate = false;
 	}
 
 	if(inputManager->pressedOnce("up"))
@@ -84,7 +83,6 @@ bool Player::update(Tile** tiles, std::vector<sf::RectangleShape>& collisions)
 		if(playerData.velocity.y == 0.0f)
 		{
 			playerData.velocity.y = -7.5f;
-			pushUpdate = true;
 		}
 	}
 
@@ -94,7 +92,6 @@ bool Player::update(Tile** tiles, std::vector<sf::RectangleShape>& collisions)
 		{
 			//playerData.state = (sf::Int32)playerData.SWING;
 			attacking = true;
-			pushUpdate = true;
 			atkTimer.restart();
 		}
 	}
@@ -116,6 +113,7 @@ bool Player::update(Tile** tiles, std::vector<sf::RectangleShape>& collisions)
 		{
 			// Stop the player's fall
 			playerData.velocity.y = 0.0f;
+			pushUpdate = true;
 
 			// Moving the player out of the tile
 			sprite.move(0, -(sprite.getGlobalBounds().top + Tile::getSize()- tileBounds.top));
@@ -167,6 +165,8 @@ bool Player::update(Tile** tiles, std::vector<sf::RectangleShape>& collisions)
 
 	if (attacking)
 	{
+		pushUpdate = true;
+
 		if(atkTimer.getElapsedTime().asSeconds() <= 0.5f)
 		{
 			atkSprite.setFillColor(sf::Color(0, 125, 125, 100));
@@ -208,6 +208,7 @@ bool Player::update(Tile** tiles, std::vector<sf::RectangleShape>& collisions)
 
 	playerData.position = sprite.getPosition();
 	previousState = playerData.state;
+	return pushUpdate;
 }
 
 void Player::render(sf::RenderWindow& window)

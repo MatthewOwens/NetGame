@@ -328,31 +328,26 @@ void Server::listen()
 
 			std::cout << conf << " ms!" << std::endl;
 			std::cout << "Server measured a ping of " << machines[clientID]->pingTime << " ms." << std::endl;
-			/*
 
-			conf = UNCONFIRMED;
-			status = sf::Socket::NotReady;
-			std::cout << "OK!" << std::endl;
-			std::cout << "Sending confirmation to the client... " << std::flush;
-
-			// Sending a confirmation to the client
-			while (status == sf::Socket::NotReady)
+			// Updating the other clients
+			sf::Int8 header = 1;
+			sf::Packet packet;
+			for(int i = 0; i < clientID; ++i)
 			{
-				status = playerSocket.send(&conf, sizeof(conf),
-						 machines[clientID]->ip, machines[clientID]->port);
+				if(i != clientID && machines[i] != NULL)
+				{
+					// Ensuring the packet is clear
+					packet.clear();
+					packet << header << *players[i];
+
+					status = sf::Socket::NotReady;
+
+					while(status == sf::Socket::NotReady)
+						status = playerSocket.send(packet, machines[clientID]->ip, machines[clientID]->port);
+
+					std::cout << "Sending data on " << i << " to " << (int)clientID << std::endl;
+				}
 			}
-
-			std::cout << "OK!" << std::endl;
-			std::cout << "Waiting for client acknowledgement... " << std::flush;
-
-			while (status == sf::Socket::NotReady || conf == UNCONFIRMED)
-			{
-				status = playerSocket.receive(&conf, sizeof(conf), sizeReceived,
-						 machines[clientID]->ip, machines[clientID]->port);
-			}
-
-			std::cout << "OK!" << std::endl;
-			*/
 
 		}
 		else

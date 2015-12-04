@@ -217,7 +217,6 @@ int Client::run()
 	while (status == sf::Socket::NotReady)
 		status = udpSocket->send(message, SERVERIP, SERVERPORT);
 
-	updateClock.restart();
 
 	return 0;
 }
@@ -230,6 +229,7 @@ void Client::update()
 
 	sf::IpAddress remoteIP;
 	unsigned short remotePort;
+	updateClock.restart();
 
 	sf::Event event;
 	while (window.pollEvent(event))
@@ -366,7 +366,7 @@ void Client::update()
 	for(int i = 0; i < 3; ++i)
 	{
 		if(otherPlayers[i] != NULL)
-			otherPlayers[i]->update(serverTime());
+			otherPlayers[i]->update(serverTime(), updateClock.getElapsedTime().asMilliseconds());
 	}
 }
 

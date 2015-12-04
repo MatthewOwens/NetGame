@@ -43,9 +43,12 @@ NetworkedPlayer::NetworkedPlayer(PlayerData initialData)
 	}
 }
 
-bool NetworkedPlayer::update(float clientTime)
+bool NetworkedPlayer::update(float clientTime, float deltaTime)
 {
 	bool attackingRight = true;
+
+	if(data.atkTimer != 0.0f)
+		data.atkTimer += 1 / deltaTime;
 
 	if (sprite.getPosition().x > atkSprite.getPosition().x)
 		attackingRight = false;
@@ -63,6 +66,7 @@ bool NetworkedPlayer::update(float clientTime)
 	if (data.atkTimer >= 0.7f || data.atkTimer == 0)
 	{
 		atkSprite.setFillColor(sf::Color(0, 0, 0, 0));
+		data.atkTimer = 0.0f;
 	}
 
 	// Checking if we should extrapolate our position
@@ -97,6 +101,7 @@ bool NetworkedPlayer::update(float clientTime)
 			// Extrapolate position for this frame from the history + serverTime()
 			sf::Vector2f acceleration;
 			PlayerData* histBack = &history.back();
+			std::cout << "Prediction" << std::endl;
 
 			// Calculating our accelleration based on our recent history
 			acceleration.x = (histBack->position.x + (histBack - 1)->position.x) / (histBack->updateTime - (histBack - 1)->updateTime);
@@ -140,18 +145,17 @@ void NetworkedPlayer::updateData(PlayerData newData, float clientTime)
 	float timeDiff = (clientTime - newData.updateTime);
 
 	// Increasing atkTimer to compensate for latency
-	/*if(newData.atkTimer != 0)
+	if(newData.atkTimer != 0)
 	{
 		std::cout << "Increasing atkTimer by " << 1 / (clientTime - newData.updateTime) << std::endl;
 		newData.atkTimer += 1 / (clientTime - newData.updateTime);
-	}*/
+	}
 
 	// TODO: Figure out this odd diff issue
-	if(std::abs(diff.x) + std::abs(diff.y) <= 12)
+	if(std::abs(diff.x) + std::abs(diff.y) <= 64)
 		interp = DESYNC;
 	else
 	{
-		std::cout << "Snapping" << std::endl;
 		interp = NONE;	// Diff too large, snap
 	}
 

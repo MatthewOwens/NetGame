@@ -13,7 +13,7 @@ public:
 	NetworkedPlayer(PlayerData initialData);
 	~NetworkedPlayer();
 	void updateData(PlayerData newData, float clientTime);
-	bool update(float clientTime);
+	bool update(float clientTime, float deltaTime);
 	void render(sf::RenderWindow& window);
 
 	inline const PlayerData& getData() { return data; };
