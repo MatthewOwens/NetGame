@@ -366,7 +366,7 @@ void Client::update()
 	for(int i = 0; i < 3; ++i)
 	{
 		if(otherPlayers[i] != NULL)
-			otherPlayers[i]->update(serverTime(), updateClock.getElapsedTime().asMilliseconds());
+			otherPlayers[i]->update(serverTime());
 	}
 }
 

@@ -43,12 +43,9 @@ NetworkedPlayer::NetworkedPlayer(PlayerData initialData)
 	}
 }
 
-bool NetworkedPlayer::update(float clientTime, float deltaTime)
+bool NetworkedPlayer::update(float clientTime)
 {
 	bool attackingRight = true;
-
-	if(data.atkTimer != 0.0f)
-		data.atkTimer += 1 / deltaTime;
 
 	if (sprite.getPosition().x > atkSprite.getPosition().x)
 		attackingRight = false;
@@ -63,7 +60,7 @@ bool NetworkedPlayer::update(float clientTime, float deltaTime)
 		atkSprite.setFillColor(sf::Color(255, 0, 0, 100));
 	}
 
-	if (data.atkTimer >= 0.7f || data.atkTimer == 0)
+	if (data.atkTimer >= 0.7f)// || data.atkTimer == 0)
 	{
 		atkSprite.setFillColor(sf::Color(0, 0, 0, 0));
 		data.atkTimer = 0.0f;
@@ -147,7 +144,6 @@ void NetworkedPlayer::updateData(PlayerData newData, float clientTime)
 	// Increasing atkTimer to compensate for latency
 	if(newData.atkTimer != 0)
 	{
-		std::cout << "Increasing atkTimer by " << 1 / (clientTime - newData.updateTime) << std::endl;
 		newData.atkTimer += 1 / (clientTime - newData.updateTime);
 	}
 
@@ -167,6 +163,8 @@ void NetworkedPlayer::updateData(PlayerData newData, float clientTime)
 
 	// Updating our data with what we've recieved from the server
 	data = newData;
+	std::cout << "new time: " << data.atkTimer << std::endl;
+	std::cout << "new time: " << newData.atkTimer << std::endl;
 
 }
 
